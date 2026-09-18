@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ABA Birds I Need</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --ink:#241d1b;
+    --paper:#f1ece2;
+    --paper-2:#e7e0d1;
+    --line:#c7bba3;
+    --pine:#39506b;
+    --pine-2:#4d6c8f;
+    --rust:#b0472a;
+    --rust-2:#8f3a22;
+    --muted:#6c6255;
+    --card:#faf7ef;
+    --need-bg:#faf7ef;
+    --got-bg:#e6ebe4;
+    --tag-local:#4a7c59;
+    --tag-accidental:#3d6b7d;
+    --tag-casual:#8a6d1f;
+    --tag-rare:#b0472a;
+    --tag-extinct:#6c6255;
+    --tag-provisional:#6b5b95;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#eae4d8;
+      --paper:#181410;
+      --paper-2:#201a14;
+      --line:#453a2e;
+      --pine:#8fb0d4;
+      --pine-2:#aecdec;
+      --rust:#ec9271;
+      --rust-2:#f4ae94;
+      --muted:#a49a89;
+      --card:#201a14;
+      --need-bg:#201a14;
+      --got-bg:#22251d;
+      --tag-local:#8fd19e;
+      --tag-accidental:#7fb8d0;
+      --tag-casual:#e0c15c;
+      --tag-rare:#ec9271;
+      --tag-extinct:#a49a89;
+      --tag-provisional:#b3a3d9;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#eae4d8;
+    --paper:#181410;
+    --paper-2:#201a14;
+    --line:#453a2e;
+    --pine:#8fb0d4;
+    --pine-2:#aecdec;
+    --rust:#ec9271;
+    --rust-2:#f4ae94;
+    --muted:#a49a89;
+    --card:#201a14;
+    --need-bg:#201a14;
+    --got-bg:#22251d;
+    --tag-local:#8fd19e;
+    --tag-accidental:#7fb8d0;
+    --tag-casual:#e0c15c;
+    --tag-rare:#ec9271;
+    --tag-extinct:#a49a89;
+    --tag-provisional:#b3a3d9;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Public Sans',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:2.25rem 1.25rem 5rem;
+  }
+  .mark{
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+    color:var(--pine);
+    font-weight:600;
+    font-size:.8rem;
+    letter-spacing:.02em;
+    margin-bottom:1.1rem;
+  }
+  .mark svg{ flex:none; }
+
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:2.35rem;
+    line-height:1.08;
+    letter-spacing:-0.01em;
+    margin:0 0 .6rem;
+    max-width:16ch;
+  }
+  h1 em{
+    font-style:italic;
+    color:var(--rust);
+  }
+  .lede{
+    color:var(--muted);
+    font-size:1.02rem;
+    max-width:46ch;
+    margin:0 0 2.1rem;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1.4rem 1.4rem 1.5rem;
+    margin-bottom:1.1rem;
+  }
+
+  .field-label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:.6rem;
+  }
+  .field-label .num{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    color:var(--rust);
+    font-size:.95rem;
+    margin-right:.5rem;
+  }
+  .field-label h2{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:1.08rem;
+    margin:0;
+    flex:1;
+  }
+  .sub{
+    font-size:.82rem;
+    color:var(--muted);
+  }
+
+  .drop{
+    border:1.5px dashed var(--line);
+    border-radius:3px;
+    padding:1.5rem 1rem;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+    position:relative;
+  }
+  .drop:hover, .drop.drag{
+    border-color:var(--pine);
+    background:var(--got-bg);
+  }
+  .drop input{
+    position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+  }
+  .drop .icon{
+    font-size:1.5rem;
+    margin-bottom:.35rem;
+    display:block;
+  }
+  .drop .main{
+    font-weight:600;
+    font-size:.92rem;
+  }
+  .drop .hint{
+    font-size:.78rem;
+    color:var(--muted);
+    margin-top:.2rem;
+  }
+  .filename{
+    margin-top:.7rem;
+    font-size:.85rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.5rem;
+    background:var(--got-bg);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:.5rem .7rem;
+  }
+  .filename button{
+    background:none;
+    border:none;
+    color:var(--rust);
+    font-family:'Public Sans',sans-serif;
+    font-size:.78rem;
+    font-weight:600;
+    cursor:pointer;
+    padding:0;
+  }
+  .privacy-note{
+    font-size:.78rem;
+    color:var(--muted);
+    margin-top:.9rem;
+    border-top:1px solid var(--line);
+    padding-top:.7rem;
+  }
+
+  .error-box{
+    background: color-mix(in srgb, var(--rust) 12%, var(--card));
+    border:1px solid var(--rust);
+    border-radius:3px;
+    padding:.7rem .9rem;
+    font-size:.85rem;
+    margin-top:.8rem;
+    color:var(--ink);
+  }
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+    margin-bottom:1.3rem;
+  }
+  .stat{
+    background:var(--card);
+    padding:.9rem .6rem;
+    text-align:center;
+  }
+  .stat .n{
+    font-family:'Fraunces',serif;
+    font-size:1.55rem;
+    font-weight:500;
+    display:block;
+    line-height:1.1;
+  }
+  .stat.need .n{ color:var(--rust); }
+  .stat.got .n{ color:var(--pine); }
+  .stat[style*="cursor:pointer"]:hover{ background:var(--got-bg); }
+  .stat .l{
+    font-size:.7rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--muted);
+    margin-top:.25rem;
+    display:block;
+  }
+
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem .9rem;
+    align-items:center;
+    margin-bottom:1.2rem;
+  }
+  .search{
+    flex:1 1 160px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:.5rem .7rem;
+    font-family:'Public Sans',sans-serif;
+    font-size:.88rem;
+    color:var(--ink);
+  }
+  .search:focus{ outline:2px solid var(--pine); outline-offset:-1px; }
+  .toggle{
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+    font-size:.8rem;
+    color:var(--muted);
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+  }
+  .toggle input{ accent-color:var(--pine); width:14px; height:14px; }
+
+  .family-group{
+    margin-bottom:1.6rem;
+  }
+  .family-title{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:.98rem;
+    color:var(--pine);
+    border-bottom:1px solid var(--line);
+    padding-bottom:.35rem;
+    margin-bottom:.15rem;
+    display:flex;
+    justify-content:space-between;
+    gap:.6rem;
+    cursor:pointer;
+    user-select:none;
+  }
+  .family-group.collapsed .species-row{ display:none; }
+  .family-title span:first-child{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .family-title .count{
+    font-family:'Public Sans',sans-serif;
+    font-style:normal;
+    font-size:.72rem;
+    color:var(--muted);
+    flex:none;
+  }
+  .species-row{
+    display:flex;
+    align-items:baseline;
+    gap:.55rem;
+    padding:.44rem .1rem;
+    border-bottom:1px solid color-mix(in srgb, var(--line) 55%, transparent);
+    font-size:.92rem;
+  }
+  .species-row:last-child{ border-bottom:none; }
+  @keyframes flashRow{
+    0%{ background:var(--got-bg); }
+    100%{ background:transparent; }
+  }
+  .species-row.flash{ animation:flashRow .6s ease; }
+  .species-row .box{
+    flex:none;
+    width:13px;height:13px;
+    border:1.4px solid var(--rust);
+    border-radius:2px;
+    margin-top:.2rem;
+  }
+  .species-row.have .box{
+    background:var(--pine);
+    border-color:var(--pine);
+  }
+  .species-row .name{ flex:1; }
+  .species-row.have .name{
+    color:var(--muted);
+  }
+  .tag{
+    font-size:.66rem;
+    font-weight:600;
+    letter-spacing:.02em;
+    padding:.1rem .35rem;
+    border-radius:2px;
+    color:var(--muted);
+    border:1px solid var(--line);
+    flex:none;
+  }
+  .tag-local{ color:var(--tag-local); border-color:var(--tag-local); }
+  .tag-rare{ color:var(--tag-rare); border-color:var(--tag-rare); }
+  .tag-casual{ color:var(--tag-casual); border-color:var(--tag-casual); }
+  .tag-accidental{ color:var(--tag-accidental); border-color:var(--tag-accidental); }
+  .tag-extinct{ color:var(--tag-extinct); border-color:var(--tag-extinct); border-style:dashed; }
+  .tag-provisional{ color:var(--tag-provisional); border-color:var(--tag-provisional); border-style:dashed; }
+  .progress-track{
+    height:8px;
+    background:var(--line);
+    border-radius:4px;
+    overflow:hidden;
+    margin-top:1rem;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--pine);
+    border-radius:4px;
+    transition:width .3s ease;
+  }
+  .progress-label{
+    font-size:.72rem;
+    color:var(--muted);
+    text-align:center;
+    margin:.35rem 0 1.3rem;
+  }
+  .range-link{
+    flex:none;
+    font-size:.7rem;
+    color:var(--pine);
+    text-decoration:none;
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:.1rem .35rem;
+    white-space:nowrap;
+  }
+  .range-link:hover{ border-color:var(--pine); }
+
+  .empty-state{
+    text-align:center;
+    padding:2rem 1rem;
+    color:var(--muted);
+    font-size:.9rem;
+  }
+
+  .reset-row{
+    text-align:center;
+    margin-top:1.8rem;
+  }
+  .reset-row button{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-family:'Public Sans',sans-serif;
+    font-size:.8rem;
+    padding:.5rem 1rem;
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .reset-row button:hover{ border-color:var(--rust); color:var(--rust); }
+
+  footer{
+    margin-top:2.5rem;
+    padding-top:1.2rem;
+    border-top:1px solid var(--line);
+    font-size:.76rem;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  ::selection{ background:var(--rust); color:var(--paper); }
+
+  @media (max-width:420px){
+    h1{ font-size:1.95rem; }
+    .stats{ grid-template-columns:1fr 1fr 1fr; }
+    .stat{ padding:.7rem .3rem; }
+    .stat .n{ font-size:1.25rem; }
+  }
+</style>
+</head>
+<body>
+<script>
+  try{
+    const t = localStorage.getItem('abaBirdsINeed_theme');
+    if(t) document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+</script>
+<div class="wrap">
+
+  <div class="mark" style="justify-content:space-between;">
+    <span style="display:flex; align-items:center; gap:.55rem;">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 12.5C4 9 7 4 12 4C15 4 17.5 6.5 17.5 9C17.5 9 15 9 13.5 9C13.5 9 15 11.5 18 12C18 12 14.5 13.5 11 12.5C11 12.5 12 15.5 9 17C9 17 8 14 7.5 12C7.5 12 4.5 13 2 12.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <circle cx="13.3" cy="6.8" r="0.9" fill="currentColor"/>
+      </svg>
+      Personal checklist
+    </span>
+    <button id="themeToggle" style="background:none; border:1px solid var(--line); border-radius:20px; color:var(--muted); font-size:.75rem; padding:.25rem .65rem; cursor:pointer; font-family:'Public Sans',sans-serif;">System</button>
+  </div>
+
+  <h1>Find your next <em>ABA-Area</em> bird.</h1>
+  <p class="lede">Upload your eBird sightings and compare them against the full ABA Checklist (lower 48, Canada, Alaska, and adjacent waters) to see exactly which species you still need.</p>
+
+  <div id="uploadCard" class="card">
+    <div class="field-label">
+      <div><span class="num">01</span><h2 style="display:inline;">Life list or year list</h2></div>
+    </div>
+    <p class="sub" style="margin:-.3rem 0 .8rem;">Your CSV or Excel export from eBird ("My eBird" → Download my data).</p>
+
+    <div id="drop" class="drop">
+      <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" />
+      <span class="icon">&#9992;</span>
+      <div class="main">Choose your sightings file</div>
+      <div class="hint">or drag it here — .csv, .xlsx, or .xls</div>
+    </div>
+    <div id="filenameBox" style="display:none;" class="filename">
+      <span id="filenameText"></span>
+      <button id="clearFile">Remove</button>
+    </div>
+    <div id="errorBox" style="display:none;" class="error-box"></div>
+
+    <p class="privacy-note">Your file is read in your browser and never leaves this page — nothing is uploaded to a server.</p>
+  </div>
+
+  <div id="resultsSection" style="display:none;">
+
+    <div class="stats">
+      <div class="stat got" id="cardGot" style="cursor:pointer;"><span class="n" id="statGot">0</span><span class="l">Recorded</span></div>
+      <div class="stat need" id="cardNeed" style="cursor:pointer;"><span class="n" id="statNeed">0</span><span class="l">Still need</span></div>
+      <div class="stat" id="cardTotal" style="cursor:pointer;"><span class="n" id="statTotal">0</span><span class="l">ABA total</span></div>
+    </div>
+
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+
+    <div class="stats" style="margin-top:-.6rem; grid-template-columns:1fr 1fr 1fr;">
+      <div class="stat" id="cardCasual" style="cursor:pointer;"><span class="n" id="statCasual" style="font-size:1.2rem;">0</span><span class="l">Casual seen</span></div>
+      <div class="stat" id="cardAccidental" style="cursor:pointer;"><span class="n" id="statAccidental" style="font-size:1.2rem;">0</span><span class="l">Accidental seen</span></div>
+      <div class="stat" id="cardExtinct" style="cursor:pointer;"><span class="n" id="statExtinct" style="font-size:1.2rem;">0</span><span class="l">Extinct/extirpated seen</span></div>
+    </div>
+
+    <div class="controls">
+      <input id="searchBox" class="search" type="text" placeholder="Search species…" />
+      <select id="sortMode" class="search" style="flex:none; width:auto;">
+        <option value="taxo">Taxonomic order</option>
+        <option value="alpha">Alphabetical</option>
+      </select>
+      <select id="familyJump" class="search" style="flex:none; width:auto;">
+        <option value="">Jump to family…</option>
+      </select>
+      <label class="toggle"><input type="checkbox" id="toggleHideCasual"> Hide casual</label>
+      <label class="toggle"><input type="checkbox" id="toggleHideAccidental"> Hide accidental</label>
+      <label class="toggle"><input type="checkbox" id="toggleExtinct"> Include extinct / extirpated</label>
+      <label class="toggle"><input type="checkbox" id="toggleProvisional"> Include provisional lists</label>
+    </div>
+
+    <div id="listArea"></div>
+
+    <div class="reset-row">
+      <button id="shareBtn" style="border-color:var(--pine); color:var(--pine); margin-right:.5rem;">Share needs list</button>
+      <button id="shareFullBtn" style="border-color:var(--pine); color:var(--pine); margin-right:.5rem;">Share full list</button>
+      <button id="clearMarksBtn" style="margin-right:.5rem;">Clear manual marks</button>
+      <button id="resetBtn">Start over with a new file</button>
+    </div>
+    <div id="undoBanner" style="display:none; margin-top:.8rem; text-align:center; font-size:.85rem; color:var(--muted);">
+      File cleared. <button id="undoBtn" style="background:none;border:none;color:var(--pine);font-weight:600;text-decoration:underline;cursor:pointer;padding:0;font-family:inherit;font-size:inherit;">Undo</button>
+    </div>
+  </div>
+
+  <footer>
+    Master list follows the ABA Checklist, version 8.19 (January 2026) — 1,161 species recognized on the official ABA Area list (lower 48 states, Canada, Alaska, and adjacent waters), plus two appended, non-countable Provisional Lists (exotic species possibly establishing, and potential vagrants of unknown origin). "ABA total" reflects the 1,161 official species only. Matching is done by common name and may miss recent taxonomic splits your file predates.
+  </footer>
+
+</div>
+
+<script>
+const SPECIES = [["Black-bellied Whistling-Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Fulvous Whistling-Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Emperor Goose","Ducks, Geese, and Swans (Anatidae)","Local",""],["Snow Goose","Ducks, Geese, and Swans (Anatidae)","",""],["Ross's Goose","Ducks, Geese, and Swans (Anatidae)","",""],["Graylag Goose","Ducks, Geese, and Swans (Anatidae)","ACCIDENTAL",""],["Greater White-fronted Goose","Ducks, Geese, and Swans (Anatidae)","",""],["Lesser White-fronted Goose","Ducks, Geese, and Swans (Anatidae)","ACCIDENTAL",""],["Taiga Bean-Goose","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Tundra Bean-Goose","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Pink-footed Goose","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Brant","Ducks, Geese, and Swans (Anatidae)","",""],["Barnacle Goose","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Cackling Goose","Ducks, Geese, and Swans (Anatidae)","",""],["Canada Goose","Ducks, Geese, and Swans (Anatidae)","",""],["Hawaiian Goose","Ducks, Geese, and Swans (Anatidae)","Local",""],["Mute Swan","Ducks, Geese, and Swans (Anatidae)","",""],["Trumpeter Swan","Ducks, Geese, and Swans (Anatidae)","",""],["Tundra Swan","Ducks, Geese, and Swans (Anatidae)","",""],["Whooper Swan","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Egyptian Goose","Ducks, Geese, and Swans (Anatidae)","Local",""],["Common Shelduck","Ducks, Geese, and Swans (Anatidae)","CASUAL",""],["Muscovy Duck","Ducks, Geese, and Swans (Anatidae)","Local",""],["Wood Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Baikal Teal","Ducks, Geese, and Swans (Anatidae)","CASUAL",""],["Garganey","Ducks, Geese, and Swans (Anatidae)","CASUAL",""],["Blue-winged Teal","Ducks, Geese, and Swans (Anatidae)","",""],["Cinnamon Teal","Ducks, Geese, and Swans (Anatidae)","",""],["Northern Shoveler","Ducks, Geese, and Swans (Anatidae)","",""],["Gadwall","Ducks, Geese, and Swans (Anatidae)","",""],["Falcated Duck","Ducks, Geese, and Swans (Anatidae)","CASUAL",""],["Eurasian Wigeon","Ducks, Geese, and Swans (Anatidae)","Local",""],["American Wigeon","Ducks, Geese, and Swans (Anatidae)","",""],["Laysan Duck","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Hawaiian Duck","Ducks, Geese, and Swans (Anatidae)","Local",""],["Eastern Spot-billed Duck","Ducks, Geese, and Swans (Anatidae)","CASUAL",""],["Mallard","Ducks, Geese, and Swans (Anatidae)","",""],["Mexican Duck","Ducks, Geese, and Swans (Anatidae)","Local",""],["American Black Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Mottled Duck","Ducks, Geese, and Swans (Anatidae)","",""],["White-cheeked Pintail","Ducks, Geese, and Swans (Anatidae)","CASUAL",""],["Northern Pintail","Ducks, Geese, and Swans (Anatidae)","",""],["Green-winged Teal","Ducks, Geese, and Swans (Anatidae)","",""],["Canvasback","Ducks, Geese, and Swans (Anatidae)","",""],["Redhead","Ducks, Geese, and Swans (Anatidae)","",""],["Common Pochard","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Ring-necked Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Tufted Duck","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Greater Scaup","Ducks, Geese, and Swans (Anatidae)","",""],["Lesser Scaup","Ducks, Geese, and Swans (Anatidae)","",""],["Steller's Eider","Ducks, Geese, and Swans (Anatidae)","Local",""],["Labrador Duck","Ducks, Geese, and Swans (Anatidae)","EXTINCT","Extinct worldwide since 1858"],["Spectacled Eider","Ducks, Geese, and Swans (Anatidae)","Local",""],["King Eider","Ducks, Geese, and Swans (Anatidae)","Local",""],["Common Eider","Ducks, Geese, and Swans (Anatidae)","",""],["Harlequin Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Surf Scoter","Ducks, Geese, and Swans (Anatidae)","",""],["White-winged Scoter","Ducks, Geese, and Swans (Anatidae)","",""],["Stejneger's Scoter","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Common Scoter","Ducks, Geese, and Swans (Anatidae)","ACCIDENTAL",""],["Black Scoter","Ducks, Geese, and Swans (Anatidae)","",""],["Long-tailed Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Bufflehead","Ducks, Geese, and Swans (Anatidae)","",""],["Common Goldeneye","Ducks, Geese, and Swans (Anatidae)","",""],["Barrow's Goldeneye","Ducks, Geese, and Swans (Anatidae)","",""],["Smew","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Hooded Merganser","Ducks, Geese, and Swans (Anatidae)","",""],["Common Merganser","Ducks, Geese, and Swans (Anatidae)","",""],["Red-breasted Merganser","Ducks, Geese, and Swans (Anatidae)","",""],["Masked Duck","Ducks, Geese, and Swans (Anatidae)","RARE",""],["Ruddy Duck","Ducks, Geese, and Swans (Anatidae)","",""],["Plain Chachalaca","Curassows and Guans (Cracidae)","Local",""],["Mountain Quail","New World Quail (Odontophoridae)","",""],["Northern Bobwhite","New World Quail (Odontophoridae)","",""],["Scaled Quail","New World Quail (Odontophoridae)","",""],["California Quail","New World Quail (Odontophoridae)","",""],["Gambel's Quail","New World Quail (Odontophoridae)","",""],["Montezuma Quail","New World Quail (Odontophoridae)","Local",""],["Wild Turkey","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","",""],["Ruffed Grouse","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","",""],["Spruce Grouse","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Willow Ptarmigan","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Rock Ptarmigan","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["White-tailed Ptarmigan","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Greater Sage-Grouse","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","",""],["Gunnison Sage-Grouse","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Dusky Grouse","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Sooty Grouse","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Sharp-tailed Grouse","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Greater Prairie-Chicken","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Lesser Prairie-Chicken","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Gray Partridge","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Ring-necked Pheasant","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","",""],["Kalij Pheasant","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Indian Peafowl","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Gray Francolin","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Black Francolin","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Red Junglefowl","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Himalayan Snowcock","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Chukar","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["Erckel's Spurfowl (Francolin)","Partridges, Grouse, Turkeys, and Old World Quail (Phasianidae)","Local",""],["American Flamingo","Flamingos (Phoenicopteridae)","RARE",""],["Least Grebe","Grebes (Podicipedidae)","Local",""],["Pied-billed Grebe","Grebes (Podicipedidae)","",""],["Horned Grebe","Grebes (Podicipedidae)","",""],["Red-necked Grebe","Grebes (Podicipedidae)","",""],["Eared Grebe","Grebes (Podicipedidae)","",""],["Western Grebe","Grebes (Podicipedidae)","",""],["Clark's Grebe","Grebes (Podicipedidae)","",""],["Chestnut-bellied Sandgrouse","Sandgrouses (Pteroclidae)","RARE",""],["Inca Dove","Pigeons and Doves (Columbidae)","",""],["Common Ground Dove","Pigeons and Doves (Columbidae)","",""],["Ruddy Ground Dove","Pigeons and Doves (Columbidae)","RARE",""],["Ruddy Quail-Dove","Pigeons and Doves (Columbidae)","CASUAL",""],["Key West Quail-Dove","Pigeons and Doves (Columbidae)","CASUAL",""],["White-tipped Dove","Pigeons and Doves (Columbidae)","Local",""],["White-winged Dove","Pigeons and Doves (Columbidae)","",""],["Zenaida Dove","Pigeons and Doves (Columbidae)","CASUAL",""],["Mourning Dove","Pigeons and Doves (Columbidae)","",""],["Passenger Pigeon","Pigeons and Doves (Columbidae)","EXTINCT","Extinct worldwide since 1914"],["Band-tailed Pigeon","Pigeons and Doves (Columbidae)","",""],["Scaly-naped Pigeon","Pigeons and Doves (Columbidae)","ACCIDENTAL",""],["White-crowned Pigeon","Pigeons and Doves (Columbidae)","Local",""],["Red-billed Pigeon","Pigeons and Doves (Columbidae)","Local",""],["Spotted Dove","Pigeons and Doves (Columbidae)","Local",""],["Oriental Turtle-Dove","Pigeons and Doves (Columbidae)","CASUAL",""],["European Turtle-Dove","Pigeons and Doves (Columbidae)","ACCIDENTAL",""],["Eurasian Collared-Dove","Pigeons and Doves (Columbidae)","",""],["African Collared-Dove","Pigeons and Doves (Columbidae)","EXTIRPATED_ABA","Population present in ABA area 1969-1994, then died out \u2014 species still exists elsewhere"],["Common Wood-Pigeon (Wood Pigeon)","Pigeons and Doves (Columbidae)","ACCIDENTAL",""],["Rock Pigeon","Pigeons and Doves (Columbidae)","",""],["Zebra Dove","Pigeons and Doves (Columbidae)","Local",""],["Smooth-billed Ani","Cuckoos, Roadrunners, and Anis (Cuculidae)","RARE",""],["Groove-billed Ani","Cuckoos, Roadrunners, and Anis (Cuculidae)","Local",""],["Greater Roadrunner","Cuckoos, Roadrunners, and Anis (Cuculidae)","",""],["Common Cuckoo","Cuckoos, Roadrunners, and Anis (Cuculidae)","RARE",""],["Oriental Cuckoo","Cuckoos, Roadrunners, and Anis (Cuculidae)","CASUAL",""],["Dark-billed Cuckoo","Cuckoos, Roadrunners, and Anis (Cuculidae)","ACCIDENTAL",""],["Yellow-billed Cuckoo","Cuckoos, Roadrunners, and Anis (Cuculidae)","",""],["Mangrove Cuckoo","Cuckoos, Roadrunners, and Anis (Cuculidae)","Local",""],["Black-billed Cuckoo","Cuckoos, Roadrunners, and Anis (Cuculidae)","",""],["Lesser Nighthawk","Goatsuckers (Caprimulgidae)","",""],["Common Nighthawk","Goatsuckers (Caprimulgidae)","",""],["Antillean Nighthawk","Goatsuckers (Caprimulgidae)","Local",""],["Common Pauraque","Goatsuckers (Caprimulgidae)","Local",""],["Common Poorwill","Goatsuckers (Caprimulgidae)","",""],["Chuck-will's-widow","Goatsuckers (Caprimulgidae)","",""],["Buff-collared Nightjar","Goatsuckers (Caprimulgidae)","RARE",""],["Eastern Whip-poor-will","Goatsuckers (Caprimulgidae)","",""],["Mexican Whip-poor-will","Goatsuckers (Caprimulgidae)","Local",""],["Gray Nightjar","Goatsuckers (Caprimulgidae)","ACCIDENTAL",""],["Black Swift","Swifts (Apodidae)","Local",""],["White-collared Swift","Swifts (Apodidae)","CASUAL",""],["Chimney Swift","Swifts (Apodidae)","",""],["Vaux's Swift","Swifts (Apodidae)","",""],["White-throated Needletail","Swifts (Apodidae)","ACCIDENTAL",""],["Mariana Swiftlet","Swifts (Apodidae)","Local",""],["Common Swift","Swifts (Apodidae)","CASUAL",""],["Pacific (Fork-tailed) Swift","Swifts (Apodidae)","CASUAL",""],["White-throated Swift","Swifts (Apodidae)","",""],["Antillean Palm Swift (Palm-Swift)","Swifts (Apodidae)","ACCIDENTAL",""],["Mexican Violetear","Hummingbirds (Trochilidae)","RARE",""],["Green-breasted Mango","Hummingbirds (Trochilidae)","CASUAL",""],["Rivoli's Hummingbird","Hummingbirds (Trochilidae)","Local",""],["Plain-capped Starthroat","Hummingbirds (Trochilidae)","CASUAL",""],["Amethyst-throated Mountain-gem","Hummingbirds (Trochilidae)","ACCIDENTAL",""],["Blue-throated Mountain-gem","Hummingbirds (Trochilidae)","Local",""],["Lucifer Hummingbird","Hummingbirds (Trochilidae)","Local",""],["Ruby-throated Hummingbird","Hummingbirds (Trochilidae)","",""],["Black-chinned Hummingbird","Hummingbirds (Trochilidae)","",""],["Bahama Woodstar","Hummingbirds (Trochilidae)","ACCIDENTAL",""],["Anna's Hummingbird","Hummingbirds (Trochilidae)","",""],["Costa's Hummingbird","Hummingbirds (Trochilidae)","",""],["Calliope Hummingbird","Hummingbirds (Trochilidae)","",""],["Rufous Hummingbird","Hummingbirds (Trochilidae)","",""],["Allen's Hummingbird","Hummingbirds (Trochilidae)","",""],["Broad-tailed Hummingbird","Hummingbirds (Trochilidae)","",""],["Bumblebee Hummingbird","Hummingbirds (Trochilidae)","ACCIDENTAL",""],["Broad-billed Hummingbird","Hummingbirds (Trochilidae)","Local",""],["White-eared Hummingbird","Hummingbirds (Trochilidae)","RARE",""],["Xantus's Hummingbird","Hummingbirds (Trochilidae)","ACCIDENTAL",""],["Violet-crowned Hummingbird","Hummingbirds (Trochilidae)","Local",""],["Berylline Hummingbird","Hummingbirds (Trochilidae)","RARE",""],["Cinnamon Hummingbird","Hummingbirds (Trochilidae)","ACCIDENTAL",""],["Buff-bellied Hummingbird","Hummingbirds (Trochilidae)","Local",""],["Sungrebe","Sungrebes (Heliornithidae)","ACCIDENTAL",""],["Limpkin","Limpkins (Aramidae)","Local",""],["Sandhill Crane","Cranes (Gruidae)","",""],["Common Crane","Cranes (Gruidae)","CASUAL",""],["Hooded Crane","Cranes (Gruidae)","ACCIDENTAL",""],["Whooping Crane","Cranes (Gruidae)","Local",""],["Spotted Rail","Rails, Gallinules, and Coots (Rallidae)","ACCIDENTAL",""],["Paint-billed Crake","Rails, Gallinules, and Coots (Rallidae)","ACCIDENTAL",""],["Rufous-necked Wood-Rail","Rails, Gallinules, and Coots (Rallidae)","ACCIDENTAL",""],["Ridgway's Rail","Rails, Gallinules, and Coots (Rallidae)","Local",""],["King Rail","Rails, Gallinules, and Coots (Rallidae)","",""],["Clapper Rail","Rails, Gallinules, and Coots (Rallidae)","",""],["Virginia Rail","Rails, Gallinules, and Coots (Rallidae)","",""],["Corn Crake","Rails, Gallinules, and Coots (Rallidae)","CASUAL",""],["Sora","Rails, Gallinules, and Coots (Rallidae)","",""],["Common Gallinule","Rails, Gallinules, and Coots (Rallidae)","",""],["Eurasian (Common) Moorhen","Rails, Gallinules, and Coots (Rallidae)","ACCIDENTAL",""],["Eurasian Coot","Rails, Gallinules, and Coots (Rallidae)","ACCIDENTAL",""],["Hawaiian Coot","Rails, Gallinules, and Coots (Rallidae)","Local",""],["American Coot","Rails, Gallinules, and Coots (Rallidae)","",""],["Purple Gallinule","Rails, Gallinules, and Coots (Rallidae)","",""],["Gray-headed (Purple) Swamphen","Rails, Gallinules, and Coots (Rallidae)","Local",""],["Yellow Rail","Rails, Gallinules, and Coots (Rallidae)","Local",""],["Black Rail","Rails, Gallinules, and Coots (Rallidae)","Local",""],["Laysan Rail","Rails, Gallinules, and Coots (Rallidae)","EXTINCT","Extinct Hawaiian endemic"],["Hawaiian Rail","Rails, Gallinules, and Coots (Rallidae)","EXTINCT","Extinct Hawaiian endemic"],["Double-striped Thick-knee","Thick-knees (Burhinidae)","ACCIDENTAL",""],["Black-winged Stilt","Stilts and Avocets (Recurvirostridae)","ACCIDENTAL",""],["Black-necked Stilt","Stilts and Avocets (Recurvirostridae)","",""],["American Avocet","Stilts and Avocets (Recurvirostridae)","",""],["Eurasian Oystercatcher","Oystercatchers (Haematopodidae)","CASUAL",""],["American Oystercatcher","Oystercatchers (Haematopodidae)","",""],["Black Oystercatcher","Oystercatchers (Haematopodidae)","",""],["Black-bellied Plover","Lapwings and Plovers (Charadriidae)","",""],["European Golden-Plover","Lapwings and Plovers (Charadriidae)","CASUAL",""],["American Golden-Plover","Lapwings and Plovers (Charadriidae)","",""],["Pacific Golden-Plover","Lapwings and Plovers (Charadriidae)","Local",""],["Eurasian Dotterel","Lapwings and Plovers (Charadriidae)","CASUAL",""],["Killdeer","Lapwings and Plovers (Charadriidae)","",""],["Common Ringed Plover","Lapwings and Plovers (Charadriidae)","RARE",""],["Semipalmated Plover","Lapwings and Plovers (Charadriidae)","",""],["Piping Plover","Lapwings and Plovers (Charadriidae)","Local",""],["Little Ringed Plover","Lapwings and Plovers (Charadriidae)","ACCIDENTAL",""],["Northern Lapwing","Lapwings and Plovers (Charadriidae)","CASUAL",""],["Southern Lapwing","Lapwings and Plovers (Charadriidae)","ACCIDENTAL",""],["Siberian Sand-Plover","Lapwings and Plovers (Charadriidae)","RARE",""],["Greater Sand-Plover","Lapwings and Plovers (Charadriidae)","ACCIDENTAL",""],["Wilson's Plover","Lapwings and Plovers (Charadriidae)","",""],["Collared Plover","Lapwings and Plovers (Charadriidae)","ACCIDENTAL",""],["Mountain Plover","Lapwings and Plovers (Charadriidae)","Local",""],["Snowy Plover","Lapwings and Plovers (Charadriidae)","",""],["Kentish Plover","Lapwings and Plovers (Charadriidae)","ACCIDENTAL",""],["Northern Jacana","Jacanas (Jacanidae)","CASUAL",""],["Upland Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Bristle-thighed Curlew","Sandpipers, Phalaropes, and Allies (Scolopacidae)","Local",""],["Hudsonian Whimbrel","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Eurasian Whimbrel (Whimbrel)","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Little Curlew","Sandpipers, Phalaropes, and Allies (Scolopacidae)","ACCIDENTAL",""],["Eskimo Curlew","Sandpipers, Phalaropes, and Allies (Scolopacidae)","EXTINCT","Extinct worldwide since 1962"],["Long-billed Curlew","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Far Eastern Curlew","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Slender-billed Curlew","Sandpipers, Phalaropes, and Allies (Scolopacidae)","ACCIDENTAL",""],["Eurasian Curlew","Sandpipers, Phalaropes, and Allies (Scolopacidae)","ACCIDENTAL",""],["Bar-tailed Godwit","Sandpipers, Phalaropes, and Allies (Scolopacidae)","Local",""],["Black-tailed Godwit","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Hudsonian Godwit","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Marbled Godwit","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Ruddy Turnstone","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Black Turnstone","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Great Knot","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Red Knot","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Surfbird","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Ruff","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Broad-billed Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Sharp-tailed Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Stilt Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Curlew Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Temminck's Stint","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Long-toed Stint","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Spoon-billed Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Red-necked Stint","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Sanderling","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Dunlin","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Rock Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","Local",""],["Purple Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Baird's Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Little Stint","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Least Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["White-rumped Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Buff-breasted Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Pectoral Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Semipalmated Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Western Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Short-billed Dowitcher","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Long-billed Dowitcher","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Jack Snipe","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Eurasian Woodcock","Sandpipers, Phalaropes, and Allies (Scolopacidae)","ACCIDENTAL",""],["American Woodcock","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Solitary Snipe","Sandpipers, Phalaropes, and Allies (Scolopacidae)","ACCIDENTAL",""],["Pin-tailed Snipe","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Common Snipe","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Wilson's Snipe","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Terek Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Common Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Spotted Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Green Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Solitary Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Gray-tailed Tattler","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Wandering Tattler","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Lesser Yellowlegs","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Willet","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Spotted Redshank","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Common Greenshank","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Greater Yellowlegs","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Common Redshank","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Wood Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","RARE",""],["Marsh Sandpiper","Sandpipers, Phalaropes, and Allies (Scolopacidae)","CASUAL",""],["Wilson's Phalarope","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Red-necked Phalarope","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Red Phalarope","Sandpipers, Phalaropes, and Allies (Scolopacidae)","",""],["Oriental Pratincole","Pratincoles (Glareolidae)","ACCIDENTAL",""],["Great Skua","Skuas and Jaegers (Stercorariidae)","RARE",""],["South Polar Skua","Skuas and Jaegers (Stercorariidae)","Local",""],["Pomarine Jaeger","Skuas and Jaegers (Stercorariidae)","",""],["Parasitic Jaeger","Skuas and Jaegers (Stercorariidae)","",""],["Long-tailed Jaeger","Skuas and Jaegers (Stercorariidae)","",""],["Dovekie","Auks, Murres, and Puffins (Alcidae)","Local",""],["Common Murre","Auks, Murres, and Puffins (Alcidae)","",""],["Thick-billed Murre","Auks, Murres, and Puffins (Alcidae)","",""],["Razorbill","Auks, Murres, and Puffins (Alcidae)","",""],["Great Auk","Auks, Murres, and Puffins (Alcidae)","EXTINCT","Extinct worldwide since 1844"],["Black Guillemot","Auks, Murres, and Puffins (Alcidae)","",""],["Pigeon Guillemot","Auks, Murres, and Puffins (Alcidae)","",""],["Long-billed Murrelet","Auks, Murres, and Puffins (Alcidae)","CASUAL",""],["Marbled Murrelet","Auks, Murres, and Puffins (Alcidae)","",""],["Kittlitz's Murrelet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Scripps's Murrelet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Guadalupe Murrelet","Auks, Murres, and Puffins (Alcidae)","RARE",""],["Craveri's Murrelet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Ancient Murrelet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Cassin's Auklet","Auks, Murres, and Puffins (Alcidae)","",""],["Parakeet Auklet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Least Auklet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Whiskered Auklet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Crested Auklet","Auks, Murres, and Puffins (Alcidae)","Local",""],["Rhinoceros Auklet","Auks, Murres, and Puffins (Alcidae)","",""],["Atlantic Puffin","Auks, Murres, and Puffins (Alcidae)","",""],["Horned Puffin","Auks, Murres, and Puffins (Alcidae)","",""],["Tufted Puffin","Auks, Murres, and Puffins (Alcidae)","",""],["Brown Noddy","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Black Noddy","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Blue-gray Noddy","Gulls, Terns, and Skimmers (Laridae)","RARE",""],["Blue-billed White-Tern","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Little White-Tern","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Sooty Tern","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Gray-backed Tern","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Bridled Tern","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Aleutian Tern","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Little Tern","Gulls, Terns, and Skimmers (Laridae)","CASUAL",""],["Least Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Large-billed Tern","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Gull-billed Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Caspian Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Inca Tern","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Black Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["White-winged Tern","Gulls, Terns, and Skimmers (Laridae)","CASUAL",""],["Whiskered Tern","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Roseate Tern","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Common Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Arctic Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Forster's Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Royal Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Great Crested Tern","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Sandwich Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Elegant Tern","Gulls, Terns, and Skimmers (Laridae)","",""],["Black Skimmer","Gulls, Terns, and Skimmers (Laridae)","",""],["Swallow-tailed Gull","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Black-legged Kittiwake","Gulls, Terns, and Skimmers (Laridae)","",""],["Red-legged Kittiwake","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Ivory Gull","Gulls, Terns, and Skimmers (Laridae)","RARE",""],["Sabine's Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Bonaparte's Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Gray-hooded Gull","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Black-headed Gull","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Little Gull","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Ross's Gull","Gulls, Terns, and Skimmers (Laridae)","RARE",""],["Gray Gull","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Laughing Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Franklin's Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Pallas's Gull","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Belcher's Gull","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Black-tailed Gull","Gulls, Terns, and Skimmers (Laridae)","CASUAL",""],["Heermann's Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Common Gull","Gulls, Terns, and Skimmers (Laridae)","RARE",""],["Short-billed Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Ring-billed Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Western Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Yellow-footed Gull","Gulls, Terns, and Skimmers (Laridae)","Local",""],["California Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["European Herring Gull","Gulls, Terns, and Skimmers (Laridae)","ACCIDENTAL",""],["Vega Gull","Gulls, Terns, and Skimmers (Laridae)","RARE",""],["American Herring Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Yellow-legged Gull","Gulls, Terns, and Skimmers (Laridae)","CASUAL",""],["Iceland Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Lesser Black-backed Gull","Gulls, Terns, and Skimmers (Laridae)","Local",""],["Slaty-backed Gull","Gulls, Terns, and Skimmers (Laridae)","RARE",""],["Glaucous-winged Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Glaucous Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Great Black-backed Gull","Gulls, Terns, and Skimmers (Laridae)","",""],["Kelp Gull","Gulls, Terns, and Skimmers (Laridae)","CASUAL",""],["White-tailed Tropicbird","Tropicbirds (Phaethontidae)","Local",""],["Red-billed Tropicbird","Tropicbirds (Phaethontidae)","RARE",""],["Red-tailed Tropicbird","Tropicbirds (Phaethontidae)","Local",""],["Red-throated Loon","Loons (Gaviidae)","",""],["Arctic Loon","Loons (Gaviidae)","RARE",""],["Pacific Loon","Loons (Gaviidae)","",""],["Common Loon","Loons (Gaviidae)","",""],["Yellow-billed Loon","Loons (Gaviidae)","Local",""],["Atlantic Yellow-nosed (Yellow-nosed) Albatross","Albatrosses (Diomedeidae)","CASUAL",""],["White-capped Albatross","Albatrosses (Diomedeidae)","CASUAL",""],["Chatham Albatross","Albatrosses (Diomedeidae)","ACCIDENTAL",""],["Salvin's Albatross","Albatrosses (Diomedeidae)","ACCIDENTAL",""],["Black-browed Albatross","Albatrosses (Diomedeidae)","CASUAL",""],["Light-mantled Albatross","Albatrosses (Diomedeidae)","ACCIDENTAL",""],["Wandering Albatross (sp.)","Albatrosses (Diomedeidae)","ACCIDENTAL",""],["Laysan Albatross","Albatrosses (Diomedeidae)","Local",""],["Black-footed Albatross","Albatrosses (Diomedeidae)","",""],["Waved Albatross","Albatrosses (Diomedeidae)","ACCIDENTAL",""],["Short-tailed Albatross","Albatrosses (Diomedeidae)","RARE",""],["Wilson's Storm-Petrel","Southern Storm-Petrels (Oceanitidae)","",""],["White-faced Storm-Petrel","Southern Storm-Petrels (Oceanitidae)","RARE",""],["Black-bellied Storm-Petrel","Southern Storm-Petrels (Oceanitidae)","ACCIDENTAL",""],["European Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","CASUAL",""],["Fork-tailed Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","Local",""],["Ringed Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","ACCIDENTAL",""],["Swinhoe's Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","ACCIDENTAL",""],["Leach's Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","",""],["Townsend's Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","RARE",""],["Ainley's Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","ACCIDENTAL",""],["Ashy Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","Local",""],["Band-rumped Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","Local",""],["Wedge-rumped Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","CASUAL",""],["Black Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","",""],["Tristram's Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","RARE",""],["Least Storm-Petrel","Northern Storm-Petrels (Hydrobatidae)","Local",""],["Northern Giant-Petrel","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Northern Fulmar","Shearwaters and Petrels (Procellariidae)","",""],["Gray-faced Petrel","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Providence Petrel","Shearwaters and Petrels (Procellariidae)","CASUAL",""],["Kermadec Petrel","Shearwaters and Petrels (Procellariidae)","CASUAL",""],["Trindade Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Herald Petrel","Shearwaters and Petrels (Procellariidae)","CASUAL",""],["Murphy's Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Mottled Petrel","Shearwaters and Petrels (Procellariidae)","Local",""],["Bermuda Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Black-capped Petrel","Shearwaters and Petrels (Procellariidae)","Local",""],["Juan Fernandez Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Hawaiian Petrel","Shearwaters and Petrels (Procellariidae)","Local",""],["White-necked Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Bonin Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Black-winged Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Desertas (Fea\u00e2\u20ac\u2122s) Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Zino's Petrel","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Cook's Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Stejneger's Petrel","Shearwaters and Petrels (Procellariidae)","CASUAL",""],["Tahiti Petrel","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Bulwer's Petrel","Shearwaters and Petrels (Procellariidae)","RARE",""],["Jouanin's Petrel","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["White-chinned Petrel","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Parkinson's Petrel","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Streaked Shearwater","Shearwaters and Petrels (Procellariidae)","CASUAL",""],["Scopoli's Shearwater","Shearwaters and Petrels (Procellariidae)","Local",""],["Cory's Shearwater","Shearwaters and Petrels (Procellariidae)","",""],["Cape Verde Shearwater","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Wedge-tailed Shearwater","Shearwaters and Petrels (Procellariidae)","Local",""],["Buller's Shearwater","Shearwaters and Petrels (Procellariidae)","Local",""],["Short-tailed Shearwater","Shearwaters and Petrels (Procellariidae)","Local",""],["Sooty Shearwater","Shearwaters and Petrels (Procellariidae)","",""],["Great Shearwater","Shearwaters and Petrels (Procellariidae)","",""],["Pink-footed Shearwater","Shearwaters and Petrels (Procellariidae)","",""],["Flesh-footed Shearwater","Shearwaters and Petrels (Procellariidae)","RARE",""],["Christmas Shearwater","Shearwaters and Petrels (Procellariidae)","RARE",""],["Manx Shearwater","Shearwaters and Petrels (Procellariidae)","Local",""],["Newell's Shearwater","Shearwaters and Petrels (Procellariidae)","Local",""],["Bryan's Shearwater","Shearwaters and Petrels (Procellariidae)","ACCIDENTAL",""],["Black-vented Shearwater","Shearwaters and Petrels (Procellariidae)","",""],["Sargasso Shearwater","Shearwaters and Petrels (Procellariidae)","",""],["Barolo Shearwater","Shearwaters and Petrels (Procellariidae)","CASUAL",""],["Jabiru","Storks (Ciconiidae)","CASUAL",""],["Wood Stork","Storks (Ciconiidae)","",""],["Lesser Frigatebird","Frigatebirds (Fregatidae)","CASUAL",""],["Magnificent Frigatebird","Frigatebirds (Fregatidae)","",""],["Great Frigatebird","Frigatebirds (Fregatidae)","Local",""],["Masked Booby","Boobies and Gannets (Sulidae)","Local",""],["Nazca Booby","Boobies and Gannets (Sulidae)","RARE",""],["Blue-footed Booby","Boobies and Gannets (Sulidae)","CASUAL",""],["Brown Booby","Boobies and Gannets (Sulidae)","Local",""],["Cocos Booby","Boobies and Gannets (Sulidae)","Local",""],["Red-footed Booby","Boobies and Gannets (Sulidae)","Local",""],["Northern Gannet","Boobies and Gannets (Sulidae)","",""],["Anhinga","Darters (Anhingidae)","",""],["Brandt's Cormorant","Cormorants (Phalacrocoracidae)","",""],["Red-faced Cormorant","Cormorants (Phalacrocoracidae)","Local",""],["Pelagic Cormorant","Cormorants (Phalacrocoracidae)","",""],["Great Cormorant","Cormorants (Phalacrocoracidae)","",""],["Double-crested Cormorant","Cormorants (Phalacrocoracidae)","",""],["Neotropic Cormorant","Cormorants (Phalacrocoracidae)","",""],["White Ibis","Ibises and Spoonbills (Threskiornithidae)","",""],["Scarlet Ibis","Ibises and Spoonbills (Threskiornithidae)","ACCIDENTAL",""],["Glossy Ibis","Ibises and Spoonbills (Threskiornithidae)","",""],["White-faced Ibis","Ibises and Spoonbills (Threskiornithidae)","",""],["Roseate Spoonbill","Ibises and Spoonbills (Threskiornithidae)","",""],["American White Pelican","Pelicans (Pelecanidae)","",""],["Brown Pelican","Pelicans (Pelecanidae)","",""],["Bare-throated Tiger-Heron","Bitterns, Herons, and Allies (Ardeidae)","ACCIDENTAL",""],["Least Bittern","Bitterns, Herons, and Allies (Ardeidae)","",""],["American Bittern","Bitterns, Herons, and Allies (Ardeidae)","",""],["Yellow Bittern","Bitterns, Herons, and Allies (Ardeidae)","ACCIDENTAL",""],["Little Blue Heron","Bitterns, Herons, and Allies (Ardeidae)","",""],["Tricolored Heron","Bitterns, Herons, and Allies (Ardeidae)","",""],["Reddish Egret","Bitterns, Herons, and Allies (Ardeidae)","",""],["Chinese Egret","Bitterns, Herons, and Allies (Ardeidae)","ACCIDENTAL",""],["Snowy Egret","Bitterns, Herons, and Allies (Ardeidae)","",""],["Little Egret","Bitterns, Herons, and Allies (Ardeidae)","CASUAL",""],["Western Reef-Heron","Bitterns, Herons, and Allies (Ardeidae)","ACCIDENTAL",""],["Black-crowned Night Heron","Bitterns, Herons, and Allies (Ardeidae)","",""],["Yellow-crowned Night Heron","Bitterns, Herons, and Allies (Ardeidae)","",""],["Green Heron","Bitterns, Herons, and Allies (Ardeidae)","",""],["Chinese Pond-Heron","Bitterns, Herons, and Allies (Ardeidae)","ACCIDENTAL",""],["Great Egret","Bitterns, Herons, and Allies (Ardeidae)","",""],["Medium Egret","Bitterns, Herons, and Allies (Ardeidae)","ACCIDENTAL",""],["Western Cattle-Egret","Bitterns, Herons, and Allies (Ardeidae)","",""],["Eastern Cattle-Egret","Bitterns, Herons, and Allies (Ardeidae)","ACCIDENTAL",""],["Gray Heron","Bitterns, Herons, and Allies (Ardeidae)","CASUAL",""],["Great Blue Heron","Bitterns, Herons, and Allies (Ardeidae)","",""],["California Condor","New World Vultures (Cathartidae)","Local",""],["Black Vulture","New World Vultures (Cathartidae)","",""],["Turkey Vulture","New World Vultures (Cathartidae)","",""],["Osprey","Ospreys (Pandionidae)","",""],["White-tailed Kite","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Hook-billed Kite","Hawks, Kites, Eagles, and Allies (Accipitridae)","RARE",""],["Oriental Honey-buzzard","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Swallow-tailed Kite","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Golden Eagle","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Double-toothed Kite","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Chinese Sparrowhawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Sharp-shinned Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Eurasian Sparrowhawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Cooper's Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["American Goshawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Hen Harrier","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Northern Harrier","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Western Marsh Harrier","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Black Kite","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Bald Eagle","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["White-tailed Eagle","Hawks, Kites, Eagles, and Allies (Accipitridae)","CASUAL",""],["Steller's Sea-Eagle","Hawks, Kites, Eagles, and Allies (Accipitridae)","CASUAL",""],["Mississippi Kite","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Crane Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Snail Kite","Hawks, Kites, Eagles, and Allies (Accipitridae)","Local",""],["Common Black Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","Local",""],["Great Black Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["Roadside Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","CASUAL",""],["Harris's Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["White-tailed Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","Local",""],["Gray Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","Local",""],["Red-shouldered Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Broad-winged Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Hawaiian Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","Local",""],["Short-tailed Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","Local",""],["Swainson's Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Zone-tailed Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","Local",""],["Red-tailed Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Rough-legged Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Ferruginous Hawk","Hawks, Kites, Eagles, and Allies (Accipitridae)","",""],["Long-legged Buzzard","Hawks, Kites, Eagles, and Allies (Accipitridae)","ACCIDENTAL",""],["American Barn Owl","Barn Owls (Tytonidae)","",""],["Oriental Scops-Owl","Typical Owls (Strigidae)","ACCIDENTAL",""],["Flammulated Owl","Typical Owls (Strigidae)","Local",""],["Whiskered Screech-Owl","Typical Owls (Strigidae)","Local",""],["Western Screech-Owl","Typical Owls (Strigidae)","",""],["Eastern Screech-Owl","Typical Owls (Strigidae)","",""],["Great Horned Owl","Typical Owls (Strigidae)","",""],["Snowy Owl","Typical Owls (Strigidae)","Local",""],["Northern Hawk Owl","Typical Owls (Strigidae)","Local",""],["Northern Pygmy-Owl","Typical Owls (Strigidae)","Local",""],["Ferruginous Pygmy-Owl","Typical Owls (Strigidae)","RARE",""],["Elf Owl","Typical Owls (Strigidae)","Local",""],["Burrowing Owl","Typical Owls (Strigidae)","",""],["Spotted Owl","Typical Owls (Strigidae)","Local",""],["Barred Owl","Typical Owls (Strigidae)","",""],["Mottled Owl","Typical Owls (Strigidae)","ACCIDENTAL",""],["Great Gray Owl","Typical Owls (Strigidae)","Local",""],["Long-eared Owl","Typical Owls (Strigidae)","Local",""],["Stygian Owl","Typical Owls (Strigidae)","ACCIDENTAL",""],["Short-eared Owl","Typical Owls (Strigidae)","",""],["Boreal Owl","Typical Owls (Strigidae)","Local",""],["Northern Saw-whet Owl","Typical Owls (Strigidae)","Local",""],["Northern Boobook","Typical Owls (Strigidae)","ACCIDENTAL",""],["Elegant Trogon","Trogons (Trogonidae)","Local",""],["Eared Quetzal","Trogons (Trogonidae)","CASUAL",""],["Eurasian (Common) Hoopoe","Hoopoes (Upupidae)","ACCIDENTAL",""],["Ringed Kingfisher","Kingfishers (Alcedinidae)","Local",""],["Belted Kingfisher","Kingfishers (Alcedinidae)","",""],["Amazon Kingfisher","Kingfishers (Alcedinidae)","ACCIDENTAL",""],["Green Kingfisher","Kingfishers (Alcedinidae)","Local",""],["Eurasian Wryneck","Woodpeckers and Allies (Picidae)","ACCIDENTAL",""],["Lewis's Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Red-headed Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Acorn Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Gila Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Golden-fronted Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Red-bellied Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Williamson's Sapsucker","Woodpeckers and Allies (Picidae)","",""],["Yellow-bellied Sapsucker","Woodpeckers and Allies (Picidae)","",""],["Red-naped Sapsucker","Woodpeckers and Allies (Picidae)","",""],["Red-breasted Sapsucker","Woodpeckers and Allies (Picidae)","",""],["American Three-toed Woodpecker","Woodpeckers and Allies (Picidae)","Local",""],["Black-backed Woodpecker","Woodpeckers and Allies (Picidae)","Local",""],["Great Spotted Woodpecker","Woodpeckers and Allies (Picidae)","CASUAL",""],["Downy Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Nuttall's Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Ladder-backed Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Red-cockaded Woodpecker","Woodpeckers and Allies (Picidae)","Local",""],["Hairy Woodpecker","Woodpeckers and Allies (Picidae)","",""],["White-headed Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Arizona Woodpecker","Woodpeckers and Allies (Picidae)","Local",""],["Northern Flicker","Woodpeckers and Allies (Picidae)","",""],["Gilded Flicker","Woodpeckers and Allies (Picidae)","Local",""],["Pileated Woodpecker","Woodpeckers and Allies (Picidae)","",""],["Ivory-billed Woodpecker","Woodpeckers and Allies (Picidae)","EXTINCT","Extinct worldwide since 1944"],["Collared Forest-Falcon","Caracaras and Falcons (Falconidae)","ACCIDENTAL",""],["Crested Caracara","Caracaras and Falcons (Falconidae)","Local",""],["Yellow-headed Caracara","Caracaras and Falcons (Falconidae)","ACCIDENTAL",""],["Eurasian Kestrel","Caracaras and Falcons (Falconidae)","CASUAL",""],["American Kestrel","Caracaras and Falcons (Falconidae)","",""],["Red-footed Falcon","Caracaras and Falcons (Falconidae)","ACCIDENTAL",""],["Merlin","Caracaras and Falcons (Falconidae)","",""],["Eurasian Hobby","Caracaras and Falcons (Falconidae)","CASUAL",""],["Aplomado Falcon","Caracaras and Falcons (Falconidae)","RARE",""],["Bat Falcon","Caracaras and Falcons (Falconidae)","ACCIDENTAL",""],["Gyrfalcon","Caracaras and Falcons (Falconidae)","Local",""],["Peregrine Falcon","Caracaras and Falcons (Falconidae)","",""],["Prairie Falcon","Caracaras and Falcons (Falconidae)","",""],["Budgerigar","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","EXTIRPATED_ABA","Population present in ABA area 1975-2015, then died out \u2014 species still exists elsewhere"],["Monk Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Carolina Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","EXTINCT","Extinct worldwide since 1939"],["Nanday Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Green Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Mitred Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Red-masked Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Thick-billed Parrot","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","ACCIDENTAL",""],["White-winged Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Yellow-chevroned Parakeet","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Red-crowned Amazon","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Lilac-crowned Amazon","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","Local",""],["Yellow-headed Amazon","Parakeets, Macaws, Amazons, and Parrots (Psittacidae)","",""],["Rose-ringed Parakeet","Lories, Lovebirds, and Australasian Parrots (Psittaculidae)","Local",""],["Rosy-faced Lovebird","Lories, Lovebirds, and Australasian Parrots (Psittaculidae)","Local",""],["Masked Tityra","Becards, Tityras, and Allies (Tityridae)","ACCIDENTAL",""],["Gray-collared Becard","Becards, Tityras, and Allies (Tityridae)","ACCIDENTAL",""],["Rose-throated Becard","Becards, Tityras, and Allies (Tityridae)","RARE",""],["Northern Beardless-Tyrannulet","Tyrant Flycatchers (Tyrannidae)","Local",""],["Greenish Elaenia","Tyrant Flycatchers (Tyrannidae)","ACCIDENTAL",""],["Small-billed Elaenia","Tyrant Flycatchers (Tyrannidae)","ACCIDENTAL",""],["White-crested Elaenia","Tyrant Flycatchers (Tyrannidae)","ACCIDENTAL",""],["Dusky-capped Flycatcher","Tyrant Flycatchers (Tyrannidae)","Local",""],["Ash-throated Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Nutting's Flycatcher","Tyrant Flycatchers (Tyrannidae)","CASUAL",""],["Great Crested Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Brown-crested Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["La Sagra's Flycatcher","Tyrant Flycatchers (Tyrannidae)","RARE",""],["Great Kiskadee","Tyrant Flycatchers (Tyrannidae)","Local",""],["Social Flycatcher","Tyrant Flycatchers (Tyrannidae)","ACCIDENTAL",""],["Sulphur-bellied Flycatcher","Tyrant Flycatchers (Tyrannidae)","Local",""],["Piratic Flycatcher","Tyrant Flycatchers (Tyrannidae)","CASUAL",""],["Variegated Flycatcher","Tyrant Flycatchers (Tyrannidae)","CASUAL",""],["Crowned Slaty Flycatcher","Tyrant Flycatchers (Tyrannidae)","ACCIDENTAL",""],["Tropical Kingbird","Tyrant Flycatchers (Tyrannidae)","Local",""],["Couch's Kingbird","Tyrant Flycatchers (Tyrannidae)","Local",""],["Cassin's Kingbird","Tyrant Flycatchers (Tyrannidae)","",""],["Thick-billed Kingbird","Tyrant Flycatchers (Tyrannidae)","Local",""],["Western Kingbird","Tyrant Flycatchers (Tyrannidae)","",""],["Eastern Kingbird","Tyrant Flycatchers (Tyrannidae)","",""],["Gray Kingbird","Tyrant Flycatchers (Tyrannidae)","Local",""],["Loggerhead Kingbird","Tyrant Flycatchers (Tyrannidae)","ACCIDENTAL",""],["Scissor-tailed Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Fork-tailed Flycatcher","Tyrant Flycatchers (Tyrannidae)","RARE",""],["Tufted Flycatcher","Tyrant Flycatchers (Tyrannidae)","CASUAL",""],["Olive-sided Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Greater Pewee","Tyrant Flycatchers (Tyrannidae)","Local",""],["Western Wood-Pewee","Tyrant Flycatchers (Tyrannidae)","",""],["Eastern Wood-Pewee","Tyrant Flycatchers (Tyrannidae)","",""],["Cuban Pewee","Tyrant Flycatchers (Tyrannidae)","CASUAL",""],["Yellow-bellied Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Acadian Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Alder Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Willow Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Least Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Hammond's Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Gray Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Dusky Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Pine Flycatcher","Tyrant Flycatchers (Tyrannidae)","ACCIDENTAL",""],["Western Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Buff-breasted Flycatcher","Tyrant Flycatchers (Tyrannidae)","Local",""],["Black Phoebe","Tyrant Flycatchers (Tyrannidae)","",""],["Eastern Phoebe","Tyrant Flycatchers (Tyrannidae)","",""],["Say's Phoebe","Tyrant Flycatchers (Tyrannidae)","",""],["Vermilion Flycatcher","Tyrant Flycatchers (Tyrannidae)","",""],["Black-capped Vireo","Vireos (Vireonidae)","Local",""],["White-eyed Vireo","Vireos (Vireonidae)","",""],["Thick-billed Vireo","Vireos (Vireonidae)","CASUAL",""],["Cuban Vireo","Vireos (Vireonidae)","ACCIDENTAL",""],["Bell's Vireo","Vireos (Vireonidae)","",""],["Gray Vireo","Vireos (Vireonidae)","Local",""],["Hutton's Vireo","Vireos (Vireonidae)","",""],["Yellow-throated Vireo","Vireos (Vireonidae)","",""],["Cassin's Vireo","Vireos (Vireonidae)","",""],["Blue-headed Vireo","Vireos (Vireonidae)","",""],["Plumbeous Vireo","Vireos (Vireonidae)","",""],["Philadelphia Vireo","Vireos (Vireonidae)","",""],["Western Warbling-Vireo","Vireos (Vireonidae)","",""],["Eastern Warbling-Vireo","Vireos (Vireonidae)","",""],["Red-eyed Vireo","Vireos (Vireonidae)","",""],["Yellow-green Vireo","Vireos (Vireonidae)","RARE",""],["Black-whiskered Vireo","Vireos (Vireonidae)","Local",""],["Yucatan Vireo","Vireos (Vireonidae)","ACCIDENTAL",""],["Kauai Elepaio","Monarch Flycatchers (Monarchidae)","Local",""],["Oahu Elepaio","Monarch Flycatchers (Monarchidae)","Local",""],["Hawaii Elepaio","Monarch Flycatchers (Monarchidae)","Local",""],["Brown Shrike","Shrikes (Laniidae)","CASUAL",""],["Red-backed Shrike","Shrikes (Laniidae)","ACCIDENTAL",""],["Loggerhead Shrike","Shrikes (Laniidae)","",""],["Northern Shrike","Shrikes (Laniidae)","",""],["Canada Jay","Jays and Crows (Corvidae)","",""],["Brown Jay","Jays and Crows (Corvidae)","CASUAL",""],["Green Jay","Jays and Crows (Corvidae)","Local",""],["Pinyon Jay","Jays and Crows (Corvidae)","",""],["Steller's Jay","Jays and Crows (Corvidae)","",""],["Blue Jay","Jays and Crows (Corvidae)","",""],["Florida Scrub-Jay","Jays and Crows (Corvidae)","Local",""],["Island Scrub-Jay","Jays and Crows (Corvidae)","Local",""],["California Scrub-Jay","Jays and Crows (Corvidae)","",""],["Woodhouse's Scrub-Jay","Jays and Crows (Corvidae)","",""],["Mexican Jay","Jays and Crows (Corvidae)","Local",""],["Clark's Nutcracker","Jays and Crows (Corvidae)","",""],["Black-billed Magpie","Jays and Crows (Corvidae)","",""],["Yellow-billed Magpie","Jays and Crows (Corvidae)","Local",""],["Eurasian Jackdaw","Jays and Crows (Corvidae)","CASUAL",""],["American Crow","Jays and Crows (Corvidae)","",""],["Tamaulipas Crow","Jays and Crows (Corvidae)","CASUAL",""],["Fish Crow","Jays and Crows (Corvidae)","",""],["Hawaiian Crow","Jays and Crows (Corvidae)","EXTINCT","Extinct Hawaiian endemic"],["Chihuahuan Raven","Jays and Crows (Corvidae)","",""],["Common Raven","Jays and Crows (Corvidae)","",""],["Verdin","Verdin (Remizidae)","",""],["Carolina Chickadee","Chickadees and Titmice (Paridae)","",""],["Black-capped Chickadee","Chickadees and Titmice (Paridae)","",""],["Mountain Chickadee","Chickadees and Titmice (Paridae)","",""],["Mexican Chickadee","Chickadees and Titmice (Paridae)","Local",""],["Chestnut-backed Chickadee","Chickadees and Titmice (Paridae)","",""],["Boreal Chickadee","Chickadees and Titmice (Paridae)","",""],["Gray-headed Chickadee","Chickadees and Titmice (Paridae)","RARE",""],["Bridled Titmouse","Chickadees and Titmice (Paridae)","Local",""],["Oak Titmouse","Chickadees and Titmice (Paridae)","",""],["Juniper Titmouse","Chickadees and Titmice (Paridae)","",""],["Tufted Titmouse","Chickadees and Titmice (Paridae)","",""],["Black-crested Titmouse","Chickadees and Titmice (Paridae)","Local",""],["Eurasian Skylark","Larks (Alaudidae)","Local",""],["Horned Lark","Larks (Alaudidae)","",""],["Thick-billed Warbler","Reed Warblers (Acrocephalidae)","ACCIDENTAL",""],["Icterine Warbler","Reed Warblers (Acrocephalidae)","ACCIDENTAL",""],["Millerbird","Reed Warblers (Acrocephalidae)","RARE",""],["Sedge Warbler","Reed Warblers (Acrocephalidae)","ACCIDENTAL",""],["Blyth's Reed Warbler","Reed Warblers (Acrocephalidae)","ACCIDENTAL",""],["Pallas's Grasshopper Warbler","Grassbirds (Locustellidae)","ACCIDENTAL",""],["Middendorff's Grasshopper Warbler","Grassbirds (Locustellidae)","CASUAL",""],["Lanceolated Warbler","Grassbirds (Locustellidae)","CASUAL",""],["River Warbler","Grassbirds (Locustellidae)","ACCIDENTAL",""],["Bank Swallow","Swallows (Hirundinidae)","",""],["Tree Swallow","Swallows (Hirundinidae)","",""],["Bahama Swallow","Swallows (Hirundinidae)","CASUAL",""],["Violet-green Swallow","Swallows (Hirundinidae)","",""],["Mangrove Swallow","Swallows (Hirundinidae)","ACCIDENTAL",""],["Blue-and-white Swallow","Swallows (Hirundinidae)","ACCIDENTAL",""],["Northern Rough-winged Swallow","Swallows (Hirundinidae)","",""],["Brown-chested Martin","Swallows (Hirundinidae)","CASUAL",""],["Purple Martin","Swallows (Hirundinidae)","",""],["Southern Martin","Swallows (Hirundinidae)","ACCIDENTAL",""],["Gray-breasted Martin","Swallows (Hirundinidae)","ACCIDENTAL",""],["Cuban Martin","Swallows (Hirundinidae)","ACCIDENTAL",""],["Barn Swallow","Swallows (Hirundinidae)","",""],["Siberian House-Martin","Swallows (Hirundinidae)","CASUAL",""],["Cliff Swallow","Swallows (Hirundinidae)","",""],["Cave Swallow","Swallows (Hirundinidae)","",""],["Bushtit","Bushtits (Aegithalidae)","",""],["Japanese Bush Warbler","Bush-Warblers (Cettiidae)","Local",""],["Willow Warbler","Leaf Warblers (Phylloscopidae)","CASUAL",""],["Common Chiffchaff","Leaf Warblers (Phylloscopidae)","CASUAL",""],["Wood Warbler","Leaf Warblers (Phylloscopidae)","CASUAL",""],["Dusky Warbler","Leaf Warblers (Phylloscopidae)","CASUAL",""],["Pallas's Leaf Warbler","Leaf Warblers (Phylloscopidae)","ACCIDENTAL",""],["Yellow-browed Warbler","Leaf Warblers (Phylloscopidae)","CASUAL",""],["Arctic Warbler","Leaf Warblers (Phylloscopidae)","Local",""],["Kamchatka Leaf Warbler","Leaf Warblers (Phylloscopidae)","CASUAL",""],["Red-vented Bulbul","Bulbuls (Pycnonotidae)","Local",""],["Red-whiskered Bulbul","Bulbuls (Pycnonotidae)","Local",""],["Lesser Whitethroat","Sylviid Warblers (Sylviidae)","ACCIDENTAL",""],["Wrentit","Sylviid Warblers (Sylviidae)","",""],["Warbling White-eye","White-eyes (Zosteropidae)","Local",""],["Greater Necklaced Laughingthrush","Laughingthrushes (Leiothrichidae)","Local",""],["Chinese Hwamei (Hwamei)","Laughingthrushes (Leiothrichidae)","Local",""],["Red-billed Leiothrix","Laughingthrushes (Leiothrichidae)","Local",""],["Ruby-crowned Kinglet","Kinglets (Regulidae)","",""],["Golden-crowned Kinglet","Kinglets (Regulidae)","",""],["Bohemian Waxwing","Waxwings (Bombycillidae)","Local",""],["Cedar Waxwing","Waxwings (Bombycillidae)","",""],["Gray Silky-flycatcher","Silky-flycatchers (Ptiliogonatidae)","ACCIDENTAL",""],["Phainopepla","Silky-flycatchers (Ptiliogonatidae)","",""],["Kauai Oo","Hawaiian Mohos (Mohoidae)","EXTINCT","Extinct Hawaiian endemic"],["Oahu Oo","Hawaiian Mohos (Mohoidae)","EXTINCT","Extinct Hawaiian endemic"],["Bishop's Oo","Hawaiian Mohos (Mohoidae)","EXTINCT","Extinct Hawaiian endemic"],["Hawaii Oo","Hawaiian Mohos (Mohoidae)","EXTINCT","Extinct Hawaiian endemic"],["Kioea","Hawaiian Mohos (Mohoidae)","EXTINCT","Extinct Hawaiian endemic"],["Red-breasted Nuthatch","Nuthatches (Sittidae)","",""],["White-breasted Nuthatch","Nuthatches (Sittidae)","",""],["Pygmy Nuthatch","Nuthatches (Sittidae)","",""],["Brown-headed Nuthatch","Nuthatches (Sittidae)","",""],["Brown Creeper","Creepers (Certhiidae)","",""],["Blue-gray Gnatcatcher","Gnatcatchers and Gnatwrens (Polioptilidae)","",""],["Black-tailed Gnatcatcher","Gnatcatchers and Gnatwrens (Polioptilidae)","",""],["California Gnatcatcher","Gnatcatchers and Gnatwrens (Polioptilidae)","Local",""],["Black-capped Gnatcatcher","Gnatcatchers and Gnatwrens (Polioptilidae)","RARE",""],["Rock Wren","Wrens (Troglodytidae)","",""],["Canyon Wren","Wrens (Troglodytidae)","",""],["Sinaloa Wren","Wrens (Troglodytidae)","ACCIDENTAL",""],["Cactus Wren","Wrens (Troglodytidae)","",""],["Bewick's Wren","Wrens (Troglodytidae)","",""],["Carolina Wren","Wrens (Troglodytidae)","",""],["Northern House Wren","Wrens (Troglodytidae)","",""],["Pacific Wren","Wrens (Troglodytidae)","",""],["Winter Wren","Wrens (Troglodytidae)","",""],["Sedge Wren","Wrens (Troglodytidae)","",""],["Marsh Wren","Wrens (Troglodytidae)","",""],["Blue Mockingbird","Mockingbirds and Thrashers (Mimidae)","ACCIDENTAL",""],["Gray Catbird","Mockingbirds and Thrashers (Mimidae)","",""],["Curve-billed Thrasher","Mockingbirds and Thrashers (Mimidae)","",""],["Brown Thrasher","Mockingbirds and Thrashers (Mimidae)","",""],["Long-billed Thrasher","Mockingbirds and Thrashers (Mimidae)","Local",""],["Bendire's Thrasher","Mockingbirds and Thrashers (Mimidae)","Local",""],["California Thrasher","Mockingbirds and Thrashers (Mimidae)","Local",""],["LeConte's Thrasher","Mockingbirds and Thrashers (Mimidae)","Local",""],["Crissal Thrasher","Mockingbirds and Thrashers (Mimidae)","Local",""],["Sage Thrasher","Mockingbirds and Thrashers (Mimidae)","",""],["Bahama Mockingbird","Mockingbirds and Thrashers (Mimidae)","CASUAL",""],["Northern Mockingbird","Mockingbirds and Thrashers (Mimidae)","",""],["European Starling","Starlings (Sturnidae)","",""],["Common Myna","Starlings (Sturnidae)","Local",""],["Crested Myna","Starlings (Sturnidae)","EXTIRPATED_ABA","Population present in ABA area 1969-2003, then died out \u2014 species still exists elsewhere"],["American Dipper","Dippers (Cinclidae)","",""],["Eastern Bluebird","Thrushes (Turdidae)","",""],["Western Bluebird","Thrushes (Turdidae)","",""],["Mountain Bluebird","Thrushes (Turdidae)","",""],["Townsend's Solitaire","Thrushes (Turdidae)","",""],["Brown-backed Solitaire","Thrushes (Turdidae)","ACCIDENTAL",""],["Kamao","Thrushes (Turdidae)","EXTINCT","Extinct Hawaiian endemic"],["Amaui","Thrushes (Turdidae)","EXTINCT","Extinct Hawaiian endemic"],["Olomao","Thrushes (Turdidae)","EXTINCT","Extinct Hawaiian endemic"],["Omao","Thrushes (Turdidae)","Local",""],["Puaiohi","Thrushes (Turdidae)","Local",""],["Orange-billed Nightingale-Thrush","Thrushes (Turdidae)","ACCIDENTAL",""],["Black-headed Nightingale-Thrush","Thrushes (Turdidae)","ACCIDENTAL",""],["Veery","Thrushes (Turdidae)","",""],["Gray-cheeked Thrush","Thrushes (Turdidae)","",""],["Bicknell's Thrush","Thrushes (Turdidae)","Local",""],["Swainson's Thrush","Thrushes (Turdidae)","",""],["Hermit Thrush","Thrushes (Turdidae)","",""],["Wood Thrush","Thrushes (Turdidae)","",""],["Mistle Thrush","Thrushes (Turdidae)","ACCIDENTAL",""],["Eurasian Blackbird","Thrushes (Turdidae)","ACCIDENTAL",""],["Eyebrowed Thrush","Thrushes (Turdidae)","RARE",""],["Dusky Thrush","Thrushes (Turdidae)","CASUAL",""],["Naumann's Thrush","Thrushes (Turdidae)","ACCIDENTAL",""],["Fieldfare","Thrushes (Turdidae)","CASUAL",""],["Redwing","Thrushes (Turdidae)","CASUAL",""],["Song Thrush","Thrushes (Turdidae)","ACCIDENTAL",""],["Clay-colored Thrush","Thrushes (Turdidae)","Local",""],["White-throated Thrush","Thrushes (Turdidae)","CASUAL",""],["Rufous-backed Robin","Thrushes (Turdidae)","RARE",""],["American Robin","Thrushes (Turdidae)","",""],["Red-legged Thrush","Thrushes (Turdidae)","ACCIDENTAL",""],["Varied Thrush","Thrushes (Turdidae)","",""],["Aztec Thrush","Thrushes (Turdidae)","CASUAL",""],["Gray-streaked Flycatcher","Old World Flycatchers (Muscicapidae)","CASUAL",""],["Asian Brown Flycatcher","Old World Flycatchers (Muscicapidae)","CASUAL",""],["Spotted Flycatcher","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Dark-sided Flycatcher","Old World Flycatchers (Muscicapidae)","CASUAL",""],["White-rumped Shama","Old World Flycatchers (Muscicapidae)","Local",""],["European Robin","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Siberian Blue Robin","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Rufous-tailed Robin","Old World Flycatchers (Muscicapidae)","CASUAL",""],["Bluethroat","Old World Flycatchers (Muscicapidae)","Local",""],["Siberian Rubythroat","Old World Flycatchers (Muscicapidae)","RARE",""],["Red-flanked Bluetail","Old World Flycatchers (Muscicapidae)","CASUAL",""],["Narcissus Flycatcher","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Mugimaki Flycatcher","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Taiga Flycatcher","Old World Flycatchers (Muscicapidae)","CASUAL",""],["Common Redstart","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Rufous-tailed Rock-Thrush (Rock-thrush)","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Blue Rock-Thrush (Rock-thrush)","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Siberian Stonechat","Old World Flycatchers (Muscicapidae)","CASUAL",""],["Northern Wheatear","Old World Flycatchers (Muscicapidae)","Local",""],["Pied Wheatear","Old World Flycatchers (Muscicapidae)","ACCIDENTAL",""],["Olive Warbler","Olive Warblers (Peucedramidae)","Local",""],["African Silverbill","Waxbills (Estrildidae)","Local",""],["Java Sparrow","Waxbills (Estrildidae)","Local",""],["Scaly-breasted Munia","Waxbills (Estrildidae)","Local",""],["Tricolored Munia","Waxbills (Estrildidae)","CASUAL",""],["Chestnut Munia","Waxbills (Estrildidae)","Local",""],["Red Avadavat","Waxbills (Estrildidae)","Local",""],["Lavender Waxbill","Waxbills (Estrildidae)","Local",""],["Common Waxbill","Waxbills (Estrildidae)","Local",""],["Siberian Accentor","Accentors (Prunellidae)","CASUAL",""],["House Sparrow","Old World Sparrows (Passeridae)","",""],["Eurasian Tree Sparrow","Old World Sparrows (Passeridae)","Local",""],["Eastern Yellow Wagtail","Wagtails and Pipits (Motacillidae)","Local",""],["Citrine Wagtail","Wagtails and Pipits (Motacillidae)","ACCIDENTAL",""],["Gray Wagtail","Wagtails and Pipits (Motacillidae)","CASUAL",""],["White Wagtail","Wagtails and Pipits (Motacillidae)","RARE",""],["Tree Pipit","Wagtails and Pipits (Motacillidae)","CASUAL",""],["Olive-backed Pipit","Wagtails and Pipits (Motacillidae)","RARE",""],["Pechora Pipit","Wagtails and Pipits (Motacillidae)","CASUAL",""],["Red-throated Pipit","Wagtails and Pipits (Motacillidae)","RARE",""],["Siberian Pipit","Wagtails and Pipits (Motacillidae)","RARE",""],["American Pipit","Wagtails and Pipits (Motacillidae)","",""],["Sprague's Pipit","Wagtails and Pipits (Motacillidae)","Local",""],["Common Chaffinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","CASUAL",""],["Brambling","Fringilline and Cardueline Finches and Allies (Fringillidae)","RARE",""],["Evening Grosbeak","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Hawfinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","CASUAL",""],["Common Rosefinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","CASUAL",""],["Pallas's Rosefinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","ACCIDENTAL",""],["Poo-uli","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Akikiki","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Oahu Alauahio","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Kakawahie","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Maui Alauahio","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Palila","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Laysan Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","RARE",""],["Nihoa Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","RARE",""],["Kona Grosbeak","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Lesser Koa-Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Greater Koa-Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Ula-ai-hawane","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Akohekohe","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Laysan Honeycreeper","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Apapane","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Iiwi","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Hawaii Mamo","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Black Mamo","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Ou","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Lanai Hookbill","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Maui Parrotbill","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Kauai Nukupuu","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Oahu Nukupuu","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Maui Nukupuu","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Akiapolaau","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Lesser Akialoa","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Kauai Akialoa","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Oahu Akialoa","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Maui-nui Akialoa","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Anianiau","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Hawaii Amakihi","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Oahu Amakihi","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Kauai Amakihi","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Greater Amakihi","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Hawaii Creeper","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Akekee","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Oahu Akepa","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Maui Akepa","Fringilline and Cardueline Finches and Allies (Fringillidae)","EXTINCT","Extinct Hawaiian endemic"],["Hawaii Akepa","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Pine Grosbeak","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Eurasian Bullfinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","CASUAL",""],["Asian Rosy-Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","ACCIDENTAL",""],["Gray-crowned Rosy-Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Black Rosy-Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Brown-capped Rosy-Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["House Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Purple Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Cassin's Finch","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Oriental Greenfinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","CASUAL",""],["Yellow-fronted Canary","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Redpoll","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Red Crossbill","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Cassia Crossbill","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["White-winged Crossbill","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["European Goldfinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["Eurasian Siskin","Fringilline and Cardueline Finches and Allies (Fringillidae)","ACCIDENTAL",""],["Pine Siskin","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Lesser Goldfinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Lawrence's Goldfinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","Local",""],["American Goldfinch","Fringilline and Cardueline Finches and Allies (Fringillidae)","",""],["Island Canary","Fringilline and Cardueline Finches and Allies (Fringillidae)","RARE",""],["Lapland Longspur","Longspurs and Snow Buntings (Calcariidae)","",""],["Chestnut-collared Longspur","Longspurs and Snow Buntings (Calcariidae)","",""],["Smith's Longspur","Longspurs and Snow Buntings (Calcariidae)","Local",""],["Thick-billed Longspur","Longspurs and Snow Buntings (Calcariidae)","Local",""],["Snow Bunting","Longspurs and Snow Buntings (Calcariidae)","",""],["McKay's Bunting","Longspurs and Snow Buntings (Calcariidae)","RARE",""],["Pine Bunting","Emberizids (Emberizidae)","ACCIDENTAL",""],["Yellow-browed Bunting","Emberizids (Emberizidae)","ACCIDENTAL",""],["Little Bunting","Emberizids (Emberizidae)","CASUAL",""],["Rustic Bunting","Emberizids (Emberizidae)","RARE",""],["Yellow-throated Bunting","Emberizids (Emberizidae)","ACCIDENTAL",""],["Yellow-breasted Bunting","Emberizids (Emberizidae)","CASUAL",""],["Gray Bunting","Emberizids (Emberizidae)","ACCIDENTAL",""],["Pallas's Bunting","Emberizids (Emberizidae)","CASUAL",""],["Reed Bunting","Emberizids (Emberizidae)","CASUAL",""],["Rufous-winged Sparrow","Towhees and Sparrows (Passerellidae)","Local",""],["Botteri's Sparrow","Towhees and Sparrows (Passerellidae)","Local",""],["Cassin's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Bachman's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Grasshopper Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Olive Sparrow","Towhees and Sparrows (Passerellidae)","Local",""],["Five-striped Sparrow","Towhees and Sparrows (Passerellidae)","Local",""],["Black-throated Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Lark Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Lark Bunting","Towhees and Sparrows (Passerellidae)","",""],["Chipping Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Clay-colored Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Black-chinned Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Field Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Brewer's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Worthen's Sparrow","Towhees and Sparrows (Passerellidae)","ACCIDENTAL",""],["Fox Sparrow","Towhees and Sparrows (Passerellidae)","",""],["American Tree Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Dark-eyed Junco","Towhees and Sparrows (Passerellidae)","",""],["Yellow-eyed Junco","Towhees and Sparrows (Passerellidae)","Local",""],["White-crowned Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Golden-crowned Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Harris's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["White-throated Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Bell's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Sagebrush Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Vesper Sparrow","Towhees and Sparrows (Passerellidae)","",""],["LeConte's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Seaside Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Nelson's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Saltmarsh Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Baird's Sparrow","Towhees and Sparrows (Passerellidae)","Local",""],["Henslow's Sparrow","Towhees and Sparrows (Passerellidae)","Local",""],["Savannah Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Song Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Lincoln's Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Swamp Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Canyon Towhee","Towhees and Sparrows (Passerellidae)","",""],["Abert's Towhee","Towhees and Sparrows (Passerellidae)","",""],["California Towhee","Towhees and Sparrows (Passerellidae)","",""],["Rufous-crowned Sparrow","Towhees and Sparrows (Passerellidae)","",""],["Green-tailed Towhee","Towhees and Sparrows (Passerellidae)","",""],["Spotted Towhee","Towhees and Sparrows (Passerellidae)","",""],["Eastern Towhee","Towhees and Sparrows (Passerellidae)","",""],["Western Spindalis","Spindalises (Spindalidae)","RARE",""],["Yellow-breasted Chat","Yellow-breasted Chats (Icteriidae)","",""],["Yellow-headed Blackbird","Blackbirds (Icteridae)","",""],["Bobolink","Blackbirds (Icteridae)","",""],["Chihuahuan Meadowlark","Blackbirds (Icteridae)","",""],["Eastern Meadowlark","Blackbirds (Icteridae)","",""],["Western Meadowlark","Blackbirds (Icteridae)","",""],["Black-vented Oriole","Blackbirds (Icteridae)","CASUAL",""],["Orchard Oriole","Blackbirds (Icteridae)","",""],["Hooded Oriole","Blackbirds (Icteridae)","",""],["Streak-backed Oriole","Blackbirds (Icteridae)","CASUAL",""],["Bullock's Oriole","Blackbirds (Icteridae)","",""],["Spot-breasted Oriole","Blackbirds (Icteridae)","Local",""],["Altamira Oriole","Blackbirds (Icteridae)","Local",""],["Audubon's Oriole","Blackbirds (Icteridae)","Local",""],["Baltimore Oriole","Blackbirds (Icteridae)","",""],["Black-backed Oriole","Blackbirds (Icteridae)","ACCIDENTAL",""],["Scott's Oriole","Blackbirds (Icteridae)","",""],["Red-winged Blackbird","Blackbirds (Icteridae)","",""],["Tricolored Blackbird","Blackbirds (Icteridae)","Local",""],["Tawny-shouldered Blackbird","Blackbirds (Icteridae)","ACCIDENTAL",""],["Shiny Cowbird","Blackbirds (Icteridae)","RARE",""],["Bronzed Cowbird","Blackbirds (Icteridae)","",""],["Brown-headed Cowbird","Blackbirds (Icteridae)","",""],["Rusty Blackbird","Blackbirds (Icteridae)","",""],["Brewer's Blackbird","Blackbirds (Icteridae)","",""],["Common Grackle","Blackbirds (Icteridae)","",""],["Boat-tailed Grackle","Blackbirds (Icteridae)","",""],["Great-tailed Grackle","Blackbirds (Icteridae)","",""],["Ovenbird","Wood-Warblers (Parulidae)","",""],["Worm-eating Warbler","Wood-Warblers (Parulidae)","",""],["Louisiana Waterthrush","Wood-Warblers (Parulidae)","",""],["Northern Waterthrush","Wood-Warblers (Parulidae)","",""],["Bachman's Warbler","Wood-Warblers (Parulidae)","EXTINCT","Extinct worldwide since 1937"],["Golden-winged Warbler","Wood-Warblers (Parulidae)","Local",""],["Blue-winged Warbler","Wood-Warblers (Parulidae)","",""],["Black-and-white Warbler","Wood-Warblers (Parulidae)","",""],["Prothonotary Warbler","Wood-Warblers (Parulidae)","",""],["Swainson's Warbler","Wood-Warblers (Parulidae)","Local",""],["Crescent-chested Warbler","Wood-Warblers (Parulidae)","CASUAL",""],["Tennessee Warbler","Wood-Warblers (Parulidae)","",""],["Orange-crowned Warbler","Wood-Warblers (Parulidae)","",""],["Colima Warbler","Wood-Warblers (Parulidae)","Local",""],["Lucy's Warbler","Wood-Warblers (Parulidae)","",""],["Nashville Warbler","Wood-Warblers (Parulidae)","",""],["Virginia's Warbler","Wood-Warblers (Parulidae)","",""],["Connecticut Warbler","Wood-Warblers (Parulidae)","Local",""],["Gray-crowned Yellowthroat","Wood-Warblers (Parulidae)","CASUAL",""],["MacGillivray's Warbler","Wood-Warblers (Parulidae)","",""],["Mourning Warbler","Wood-Warblers (Parulidae)","",""],["Kentucky Warbler","Wood-Warblers (Parulidae)","",""],["Common Yellowthroat","Wood-Warblers (Parulidae)","",""],["Hooded Warbler","Wood-Warblers (Parulidae)","",""],["American Redstart","Wood-Warblers (Parulidae)","",""],["Kirtland's Warbler","Wood-Warblers (Parulidae)","Local",""],["Cape May Warbler","Wood-Warblers (Parulidae)","",""],["Cerulean Warbler","Wood-Warblers (Parulidae)","Local",""],["Northern Parula","Wood-Warblers (Parulidae)","",""],["Tropical Parula","Wood-Warblers (Parulidae)","RARE",""],["Magnolia Warbler","Wood-Warblers (Parulidae)","",""],["Bay-breasted Warbler","Wood-Warblers (Parulidae)","",""],["Blackburnian Warbler","Wood-Warblers (Parulidae)","",""],["Northern Yellow (Yellow) Warbler","Wood-Warblers (Parulidae)","",""],["Mangrove Yellow (Yellow) Warbler","Wood-Warblers (Parulidae)","Local",""],["Chestnut-sided Warbler","Wood-Warblers (Parulidae)","",""],["Blackpoll Warbler","Wood-Warblers (Parulidae)","",""],["Black-throated Blue Warbler","Wood-Warblers (Parulidae)","",""],["Palm Warbler","Wood-Warblers (Parulidae)","",""],["Pine Warbler","Wood-Warblers (Parulidae)","",""],["Yellow-rumped Warbler","Wood-Warblers (Parulidae)","",""],["Yellow-throated Warbler","Wood-Warblers (Parulidae)","",""],["Prairie Warbler","Wood-Warblers (Parulidae)","",""],["Grace's Warbler","Wood-Warblers (Parulidae)","",""],["Black-throated Gray Warbler","Wood-Warblers (Parulidae)","",""],["Townsend's Warbler","Wood-Warblers (Parulidae)","",""],["Hermit Warbler","Wood-Warblers (Parulidae)","",""],["Golden-cheeked Warbler","Wood-Warblers (Parulidae)","Local",""],["Black-throated Green Warbler","Wood-Warblers (Parulidae)","",""],["Fan-tailed Warbler","Wood-Warblers (Parulidae)","CASUAL",""],["Rufous-capped Warbler","Wood-Warblers (Parulidae)","RARE",""],["Golden-crowned Warbler","Wood-Warblers (Parulidae)","CASUAL",""],["Canada Warbler","Wood-Warblers (Parulidae)","",""],["Wilson's Warbler","Wood-Warblers (Parulidae)","",""],["Red-faced Warbler","Wood-Warblers (Parulidae)","Local",""],["Painted Redstart","Wood-Warblers (Parulidae)","Local",""],["Slate-throated Redstart","Wood-Warblers (Parulidae)","CASUAL",""],["Hepatic Tanager","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","Local",""],["Summer Tanager","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Scarlet Tanager","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Western Tanager","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Flame-colored Tanager","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","RARE",""],["Crimson-collared Grosbeak","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","CASUAL",""],["Northern Cardinal","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Pyrrhuloxia","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Yellow Grosbeak","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","CASUAL",""],["Rose-breasted Grosbeak","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Black-headed Grosbeak","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Blue Bunting","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","CASUAL",""],["Blue Grosbeak","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Lazuli Bunting","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Indigo Bunting","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Varied Bunting","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","Local",""],["Painted Bunting","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Dickcissel","Cardinals, Piranga Tanagers and Allies (Cardinalidae)","",""],["Red-crested Cardinal","Tanagers and Allies (Thraupidae)","Local",""],["Yellow-billed Cardinal","Tanagers and Allies (Thraupidae)","Local",""],["Blue-gray Tanager","Tanagers and Allies (Thraupidae)","EXTIRPATED_ABA","Population present in ABA area 1969-1982, then died out \u2014 species still exists elsewhere"],["Saffron Finch","Tanagers and Allies (Thraupidae)","Local",""],["Blue-black Grassquit","Tanagers and Allies (Thraupidae)","ACCIDENTAL",""],["Red-legged Honeycreeper","Tanagers and Allies (Thraupidae)","CASUAL",""],["Bananaquit","Tanagers and Allies (Thraupidae)","CASUAL",""],["Yellow-faced Grassquit","Tanagers and Allies (Thraupidae)","RARE",""],["Black-faced Grassquit","Tanagers and Allies (Thraupidae)","CASUAL",""],["Morelet's Seedeater","Tanagers and Allies (Thraupidae)","RARE",""],["Mandarin Duck","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Japanese Quail","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Golden Pheasant","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Silver Pheasant","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Tanimbar Corella","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Red-lored Amazon","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Yellow-headed Amazon","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["White-fronted Amazon","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Orange-winged Parrot","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Burrowing Parakeet","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Blue-and-yellow Macaw","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Chestnut-fronted Macaw","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Blue-crowned Parakeet","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["White-eyed Parakeet","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Great Tit","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Swinhoe's White-eye","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Northern Red Bishop","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Orange-cheeked Waxbill","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["Pin-tailed Whydah","Provisional List A (Exotic species, populations possibly establishing)","PROVISIONAL_A",""],["West Indian Whistling-Duck","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Ruddy Shelduck","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Azure Gallinule","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Demoiselle Crane","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Great White Pelican","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Variable Hawk","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Cattle Tyrant","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["House Crow","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Hooded Crow","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Black Catbird","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Gray Thrasher","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Tropical Mockingbird","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Rufous-collared Sparrow","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Striped Sparrow","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""],["Lesson's Seedeater","Provisional List B (Potential vagrants of unknown origin)","PROVISIONAL_B",""]]
+
+;
+
+function normalize(s){
+  if(!s) return "";
+  return s
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/['’‘`]/g,"")
+    .replace(/[\/\-–—]/g," ")
+    .replace(/\([^)]*\)/g," ")
+    .replace(/[^a-z0-9 ]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+// SPECIES entries: [commonName, family, code, note]
+const SPECIES_NORM = SPECIES.map(([name, family, code, note]) => ({
+  name, family, code, note,
+  norm: normalize(name),
+  familyNorm: normalize(family),
+  // extra match key ignoring any parenthetical AOS/alt-name clarifier in the display name
+  normNoParen: normalize(name.replace(/\([^)]*\)/g,'')),
+}));
+
+let userNames = new Set();
+let hasResults = false;
+
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('fileInput');
+const filenameBox = document.getElementById('filenameBox');
+const filenameText = document.getElementById('filenameText');
+const clearFileBtn = document.getElementById('clearFile');
+const errorBox = document.getElementById('errorBox');
+const resultsSection = document.getElementById('resultsSection');
+
+function showError(msg){
+  errorBox.style.display = 'block';
+  errorBox.textContent = msg;
+}
+function clearError(){
+  errorBox.style.display = 'none';
+  errorBox.textContent = '';
+}
+
+['dragenter','dragover'].forEach(ev=>{
+  drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('drag'); });
+});
+['dragleave','drop'].forEach(ev=>{
+  drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('drag'); });
+});
+drop.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files[0];
+  if(f) handleFile(f);
+});
+fileInput.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(f) handleFile(f);
+});
+clearFileBtn.addEventListener('click', ()=>{ resetAll(); });
+
+const STORAGE_KEY = 'abaBirdsINeed_savedFile';
+let lastCleared = null;
+let undoTimer = null;
+
+function resetAll(){
+  let snapshot = null;
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) snapshot = JSON.parse(raw);
+  }catch(e){}
+  lastCleared = (snapshot && Array.isArray(snapshot.names) && snapshot.names.length) ? snapshot : null;
+
+  userNames = new Set();
+  hasResults = false;
+  fileInput.value = '';
+  filenameBox.style.display = 'none';
+  resultsSection.style.display = 'none';
+  clearError();
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+
+  const banner = document.getElementById('undoBanner');
+  if(lastCleared){
+    banner.style.display = 'block';
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(()=>{ banner.style.display = 'none'; lastCleared = null; }, 6000);
+  } else {
+    banner.style.display = 'none';
+  }
+}
+document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+document.getElementById('undoBtn').addEventListener('click', ()=>{
+  if(!lastCleared) return;
+  clearTimeout(undoTimer);
+  document.getElementById('undoBanner').style.display = 'none';
+  const dateStr = formatSavedDate(lastCleared.savedAt);
+  filenameText.textContent = lastCleared.fileName + (dateStr ? ` (uploaded ${dateStr})` : '');
+  filenameBox.style.display = 'flex';
+  finishUpload(lastCleared.names, {fileName: lastCleared.fileName, skipScroll:true});
+  lastCleared = null;
+});
+
+function saveToStorage(fileName, names){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({fileName, names, savedAt: Date.now()}));
+  }catch(e){ }
+}
+
+function formatSavedDate(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+}
+
+function tryRestoreFromStorage(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(!data || !Array.isArray(data.names) || !data.names.length) return;
+    const dateStr = formatSavedDate(data.savedAt);
+    filenameText.textContent = data.fileName + (dateStr ? ` (uploaded ${dateStr})` : ' (restored)');
+    filenameBox.style.display = 'flex';
+    finishUpload(data.names, {skipSave:true, skipScroll:true});
+  }catch(e){ }
+}
+
+function parseCSVText(text){
+  if(text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else { inQuotes = false; }
+      } else {
+        field += c;
+      }
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\r'){ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else { field += c; }
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length > 1 || (r.length===1 && r[0].trim() !== ''));
+}
+
+function extractCommonNames(rows){
+  if(!rows.length) return [];
+  const header = rows[0].map(h => (h||'').toString().trim().toLowerCase());
+  let idx = header.findIndex(h => h === 'common name');
+  if(idx === -1) idx = header.findIndex(h => h.includes('common name'));
+  if(idx === -1) idx = header.findIndex(h => h.includes('species'));
+  if(idx === -1) throw new Error('Could not find a "Common Name" column in this file.');
+  const names = [];
+  for(let i=1;i<rows.length;i++){
+    const v = rows[i][idx];
+    if(v && v.toString().trim()) names.push(v.toString().trim());
+  }
+  return names;
+}
+
+function buildUserSet(names){
+  const set = new Set();
+  names.forEach(n=>{ set.add(normalize(n)); });
+  return set;
+}
+
+function handleFile(file){
+  clearError();
+  const name = file.name.toLowerCase();
+  filenameText.textContent = file.name;
+  filenameBox.style.display = 'flex';
+
+  if(name.endsWith('.csv') || name.endsWith('.txt')){
+    const reader = new FileReader();
+    reader.onload = e => {
+      try{
+        const rows = parseCSVText(e.target.result);
+        const names = extractCommonNames(rows);
+        finishUpload(names, {fileName: file.name});
+      }catch(err){
+        showError(err.message || 'Could not read that file.');
+      }
+    };
+    reader.onerror = () => showError('Could not read that file.');
+    reader.readAsText(file);
+  } else if(name.endsWith('.xlsx') || name.endsWith('.xls')){
+    const reader = new FileReader();
+    reader.onload = e => {
+      try{
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, {type:'array'});
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+        const names = extractCommonNames(rows);
+        finishUpload(names, {fileName: file.name});
+      }catch(err){
+        showError(err.message || 'Could not read that spreadsheet.');
+      }
+    };
+    reader.onerror = () => showError('Could not read that file.');
+    reader.readAsArrayBuffer(file);
+  } else {
+    showError('Please upload a .csv, .xlsx, or .xls file.');
+  }
+}
+
+function finishUpload(names, opts){
+  opts = opts || {};
+  if(!names.length){
+    showError('No species names were found in that file.');
+    return;
+  }
+  userNames = buildUserSet(names);
+  hasResults = true;
+  resultsSection.style.display = 'block';
+  render();
+  if(!opts.skipSave){
+    saveToStorage(opts.fileName || 'your file', names);
+  }
+  if(!opts.skipScroll){
+    resultsSection.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+tryRestoreFromStorage();
+
+const OVERRIDE_KEY = 'abaBirdsINeed_manualOverrides';
+let manualOverrides = {};
+try{
+  const raw = localStorage.getItem(OVERRIDE_KEY);
+  if(raw) manualOverrides = JSON.parse(raw) || {};
+}catch(e){}
+
+function saveOverrides(){
+  try{ localStorage.setItem(OVERRIDE_KEY, JSON.stringify(manualOverrides)); }catch(e){}
+}
+
+document.getElementById('clearMarksBtn').addEventListener('click', ()=>{
+  const count = Object.keys(manualOverrides).length;
+  if(count === 0) return;
+  if(!confirm(`Clear ${count} manual mark${count===1?'':'s'}? This won't touch your uploaded file.`)) return;
+  manualOverrides = {};
+  saveOverrides();
+  render();
+});
+
+function fileHas(sp){
+  return userNames.has(sp.norm) || (sp.normNoParen && sp.normNoParen !== sp.norm && userNames.has(sp.normNoParen));
+}
+
+function speciesHas(sp){
+  return fileHas(sp) || manualOverrides[sp.norm] === true;
+}
+
+function toggleManualMark(norm){
+  const sp = SPECIES_NORM.find(s => s.norm === norm);
+  if(sp && fileHas(sp)) return; // already reflected by your uploaded file — nothing to toggle
+  if(manualOverrides[norm]) delete manualOverrides[norm];
+  else manualOverrides[norm] = true;
+  saveOverrides();
+  render();
+}
+
+function isCasual(code){ return code === 'CASUAL'; }
+function isAccidental(code){ return code === 'ACCIDENTAL'; }
+function isExtinct(code){ return code === 'EXTINCT'; }
+function isExtirpatedABA(code){ return code === 'EXTIRPATED_ABA'; }
+function isProvisional(code){ return code === 'PROVISIONAL_A' || code === 'PROVISIONAL_B'; }
+
+function tagClass(code){
+  switch(code){
+    case 'Local': return 'tag-local';
+    case 'RARE': return 'tag-rare';
+    case 'CASUAL': return 'tag-casual';
+    case 'ACCIDENTAL': return 'tag-accidental';
+    case 'EXTINCT': return 'tag-extinct';
+    case 'EXTIRPATED_ABA': return 'tag-extinct';
+    case 'PROVISIONAL_A': return 'tag-provisional';
+    case 'PROVISIONAL_B': return 'tag-provisional';
+    default: return '';
+  }
+}
+
+function statusLabel(code){
+  switch(code){
+    case '': return null;
+    case 'Local': return 'Local';
+    case 'RARE': return 'Rare';
+    case 'CASUAL': return 'Casual';
+    case 'ACCIDENTAL': return 'Accidental';
+    case 'EXTINCT': return 'Extinct';
+    case 'EXTIRPATED_ABA': return 'Extirpated (ABA)';
+    case 'PROVISIONAL_A': return 'Provisional A';
+    case 'PROVISIONAL_B': return 'Provisional B';
+    default: return null;
+  }
+}
+
+function aabSlug(name){
+  return name
+    .replace(/\([^)]*\)/g,'')
+    .replace(/['’]/g, '')
+    .trim()
+    .replace(/\s+/g, '_');
+}
+
+function speciesRowHTML(r, showFamily){
+  const label = statusLabel(r.code);
+  const cls = tagClass(r.code);
+  const rangeUrl = "https://www.allaboutbirds.org/guide/" + aabSlug(r.name);
+  const isOverridden = manualOverrides[r.norm] === true && !fileHas(r);
+  const flashCls = (r.norm === flashNorm) ? 'flash' : '';
+  return `<div class="species-row ${r.have ? 'have':''} ${flashCls}" data-norm="${r.norm.replace(/"/g,'&quot;')}" style="cursor:pointer;" ${r.note ? `title="${r.note}"` : ''}>
+    <span class="box"></span>
+    <span class="name">${r.name}${isOverridden ? ' <span style="opacity:.55;" title="Manually marked">✎</span>' : ''}</span>
+    ${showFamily ? `<span class="tag" style="border-color:transparent;">${r.family}</span>` : ''}
+    ${label ? `<span class="tag ${cls}">${label}</span>` : ''}
+    <a class="range-link" href="${rangeUrl}" target="_blank" rel="noopener">Range ↗</a>
+  </div>`;
+}
+
+let statFilter = null; // null | 'CASUAL' | 'ACCIDENTAL' | 'EXTINCT' | 'GOT' | 'NEED' — set by tapping a stat card
+let collapsedFamilies = new Set();
+let flashNorm = null;
+
+const searchBox = document.getElementById('searchBox');
+const toggleHideCasual = document.getElementById('toggleHideCasual');
+const toggleHideAccidental = document.getElementById('toggleHideAccidental');
+const toggleExtinct = document.getElementById('toggleExtinct');
+const toggleProvisional = document.getElementById('toggleProvisional');
+const sortMode = document.getElementById('sortMode');
+[searchBox].forEach(el=> el.addEventListener('input', render));
+
+const TOGGLE_KEY = 'abaBirdsINeed_toggles';
+
+function saveToggles(){
+  try{
+    localStorage.setItem(TOGGLE_KEY, JSON.stringify({
+      hideCasual: toggleHideCasual.checked,
+      hideAccidental: toggleHideAccidental.checked,
+      showExtinct: toggleExtinct.checked,
+      showProvisional: toggleProvisional.checked,
+      sort: sortMode.value,
+    }));
+  }catch(e){ }
+}
+
+function restoreToggles(){
+  try{
+    const raw = localStorage.getItem(TOGGLE_KEY);
+    if(!raw) return;
+    const t = JSON.parse(raw);
+    if(typeof t.hideCasual === 'boolean') toggleHideCasual.checked = t.hideCasual;
+    if(typeof t.hideAccidental === 'boolean') toggleHideAccidental.checked = t.hideAccidental;
+    if(typeof t.showExtinct === 'boolean') toggleExtinct.checked = t.showExtinct;
+    if(typeof t.showProvisional === 'boolean') toggleProvisional.checked = t.showProvisional;
+    if(t.sort) sortMode.value = t.sort;
+  }catch(e){ }
+}
+restoreToggles();
+
+[toggleHideCasual, toggleHideAccidental, toggleExtinct, toggleProvisional, sortMode].forEach(el=> el.addEventListener('change', ()=>{ saveToggles(); render(); }));
+
+function toggleStatFilter(key){
+  if(key === 'TOTAL'){
+    statFilter = null;
+  } else {
+    statFilter = (statFilter === key) ? null : key;
+  }
+  render();
+  if(statFilter){
+    document.getElementById('listArea').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+document.getElementById('cardGot').addEventListener('click', ()=> toggleStatFilter('GOT'));
+document.getElementById('cardNeed').addEventListener('click', ()=> toggleStatFilter('NEED'));
+document.getElementById('cardTotal').addEventListener('click', ()=> toggleStatFilter('TOTAL'));
+document.getElementById('cardCasual').addEventListener('click', ()=> toggleStatFilter('CASUAL'));
+document.getElementById('cardAccidental').addEventListener('click', ()=> toggleStatFilter('ACCIDENTAL'));
+document.getElementById('cardExtinct').addEventListener('click', ()=> toggleStatFilter('EXTINCT'));
+
+document.getElementById('listArea').addEventListener('click', (e)=>{
+  if(e.target.closest('.range-link')) return;
+
+  const row = e.target.closest('.species-row');
+  if(row){
+    const norm = row.getAttribute('data-norm');
+    if(norm){
+      flashNorm = norm;
+      toggleManualMark(norm);
+    }
+    return;
+  }
+
+  const title = e.target.closest('.family-title');
+  if(!title) return;
+  const fam = title.getAttribute('data-family');
+  if(!fam) return;
+  if(collapsedFamilies.has(fam)) collapsedFamilies.delete(fam);
+  else collapsedFamilies.add(fam);
+  render();
+});
+
+document.getElementById('familyJump').addEventListener('change', (e)=>{
+  const fam = e.target.value;
+  if(!fam) return;
+  const anchorId = 'fam-' + fam.replace(/[^a-zA-Z0-9]/g,'');
+  if(collapsedFamilies.has(fam)){ collapsedFamilies.delete(fam); render(); }
+  const el = document.getElementById(anchorId);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  e.target.value = '';
+});
+
+const THEME_KEY = 'abaBirdsINeed_theme';
+const themeToggle = document.getElementById('themeToggle');
+function currentThemeLabel(){
+  const t = document.documentElement.getAttribute('data-theme');
+  return t === 'dark' ? 'Dark' : t === 'light' ? 'Light' : 'System';
+}
+themeToggle.textContent = currentThemeLabel();
+themeToggle.addEventListener('click', ()=>{
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = (!cur) ? 'light' : (cur === 'light') ? 'dark' : '';
+  if(next === ''){
+    document.documentElement.removeAttribute('data-theme');
+    try{ localStorage.removeItem(THEME_KEY); }catch(e){}
+  } else {
+    document.documentElement.setAttribute('data-theme', next);
+    try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+  }
+  themeToggle.textContent = currentThemeLabel();
+});
+
+function render(){
+  if(!hasResults) return;
+  const q = normalize(searchBox.value);
+  const hideCasual = toggleHideCasual.checked;
+  const hideAccidental = toggleHideAccidental.checked;
+  const showExtinct = toggleExtinct.checked;
+  const showProvisional = toggleProvisional.checked;
+  const alpha = sortMode.value === 'alpha';
+
+  let got = 0, need = 0, casualSeen = 0, accidentalSeen = 0, extinctSeen = 0;
+  const byFamily = {};
+  const flat = [];
+
+  SPECIES_NORM.forEach(sp=>{
+    const have = speciesHas(sp);
+
+    if(isProvisional(sp.code)){
+      // Not part of the official 1,161-species ABA Checklist: never counted in got/need/total.
+      if(!showProvisional) return;
+      if(q && !sp.norm.includes(q) && !sp.familyNorm.includes(q)) return;
+      const row = {...sp, have};
+      flat.push(row);
+      if(!byFamily[sp.family]) byFamily[sp.family] = [];
+      byFamily[sp.family].push(row);
+      return;
+    }
+
+    if(have && isCasual(sp.code)) casualSeen++;
+    if(have && isAccidental(sp.code)) accidentalSeen++;
+    if(have && isExtinct(sp.code)) extinctSeen++;
+    if(have && isExtirpatedABA(sp.code)) extinctSeen++;
+
+    if(!showExtinct && isExtinct(sp.code) && !have) return;
+    if(!showExtinct && isExtirpatedABA(sp.code) && !have) return;
+    if(hideCasual && isCasual(sp.code) && !have) return;
+    if(hideAccidental && isAccidental(sp.code) && !have) return;
+
+    if(have) got++; else need++;
+    if(q && !sp.norm.includes(q) && !sp.familyNorm.includes(q)) return;
+    const row = {...sp, have};
+    flat.push(row);
+    if(!byFamily[sp.family]) byFamily[sp.family] = [];
+    byFamily[sp.family].push(row);
+  });
+
+  document.getElementById('statGot').textContent = got;
+  document.getElementById('statNeed').textContent = need;
+  document.getElementById('statTotal').textContent = got + need;
+
+  const pct = (got + need) > 0 ? Math.round((got / (got + need)) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${pct}% complete — ${got} of ${got + need}`;
+  document.getElementById('statCasual').textContent = casualSeen;
+  document.getElementById('statAccidental').textContent = accidentalSeen;
+  document.getElementById('statExtinct').textContent = extinctSeen;
+
+  ['cardGot','cardNeed','cardCasual','cardAccidental','cardExtinct'].forEach(id=>{
+    document.getElementById(id).style.outline = 'none';
+  });
+
+  const listArea = document.getElementById('listArea');
+
+  if(statFilter){
+    let matches, labelText, cardId, groupByFamily = false;
+
+    if(statFilter === 'GOT'){
+      labelText = 'Recorded';
+      cardId = 'cardGot';
+      groupByFamily = true;
+      matches = SPECIES_NORM.filter(sp => !isProvisional(sp.code) && speciesHas(sp))
+        .map(sp => ({...sp, have:true}));
+    } else if(statFilter === 'NEED'){
+      labelText = 'Still need';
+      cardId = 'cardNeed';
+      groupByFamily = true;
+      matches = SPECIES_NORM.filter(sp=>{
+        if(isProvisional(sp.code)) return false;
+        if(speciesHas(sp)) return false;
+        if(!showExtinct && (isExtinct(sp.code) || isExtirpatedABA(sp.code))) return false;
+        if(hideCasual && isCasual(sp.code)) return false;
+        if(hideAccidental && isAccidental(sp.code)) return false;
+        return true;
+      }).map(sp => ({...sp, have:false}));
+    } else {
+      const predicate = statFilter === 'CASUAL' ? isCasual
+        : statFilter === 'ACCIDENTAL' ? isAccidental
+        : (code)=> isExtinct(code) || isExtirpatedABA(code);
+      labelText = statFilter === 'CASUAL' ? 'Casual' : statFilter === 'ACCIDENTAL' ? 'Accidental' : 'Extinct/extirpated';
+      cardId = statFilter === 'CASUAL' ? 'cardCasual' : statFilter === 'ACCIDENTAL' ? 'cardAccidental' : 'cardExtinct';
+      matches = SPECIES_NORM.filter(sp => speciesHas(sp) && predicate(sp.code))
+        .map(sp => ({...sp, have:true}));
+    }
+    document.getElementById(cardId).style.outline = `2px solid var(--pine)`;
+
+    const heading = statFilter === 'GOT' ? 'Species recorded'
+      : statFilter === 'NEED' ? 'Species still needed'
+      : `${labelText} species you've seen`;
+    const emptyMsg = statFilter === 'NEED'
+      ? 'Nothing left — you\'ve got them all (given current filters).'
+      : statFilter === 'GOT'
+      ? 'Nothing recorded yet.'
+      : 'None yet — nothing in this category on your list.';
+
+    let html = '';
+    if(!matches.length){
+      html = `<div class="family-group">
+        <div class="family-title"><span>${heading}</span><span class="count">0</span></div>
+        <div class="empty-state">${emptyMsg}</div>
+      </div>`;
+    } else if(groupByFamily){
+      const groupFamilies = {};
+      matches.forEach(r=>{
+        if(!groupFamilies[r.family]) groupFamilies[r.family] = [];
+        groupFamilies[r.family].push(r);
+      });
+      html += `<div class="family-group" style="margin-bottom:.3rem;">
+        <div class="family-title" style="cursor:default; border-bottom:none;"><span>${heading}</span><span class="count">${matches.length}</span></div>
+      </div>`;
+      Object.keys(groupFamilies).forEach(fam=>{
+        const rows = groupFamilies[fam];
+        const isCollapsed = collapsedFamilies.has(fam);
+        html += `<div class="family-group ${isCollapsed ? "collapsed" : ""}">
+          <div class="family-title" data-family="${fam.replace(/"/g,"&quot;")}"><span>${isCollapsed ? "▸" : "▾"} ${fam}</span><span class="count">${rows.length}</span></div>`;
+        rows.forEach(r=> html += speciesRowHTML(r, false));
+        html += `</div>`;
+      });
+    } else {
+      matches = matches.sort((a,b)=> a.name.localeCompare(b.name));
+      html = `<div class="family-group">
+        <div class="family-title"><span>${heading}</span><span class="count">${matches.length}</span></div>`;
+      matches.forEach(r=> html += speciesRowHTML(r, true));
+      html += `</div>`;
+    }
+    html += `<div class="reset-row"><button onclick="toggleStatFilter('${statFilter}')">← Back to full list</button></div>`;
+    listArea.innerHTML = html;
+    flashNorm = null;
+    return;
+  }
+
+  if(!flat.length){
+    listArea.innerHTML = '<div class="empty-state">No species match that search.</div>';
+    return;
+  }
+
+  let html = '';
+  const familyJumpSelect = document.getElementById('familyJump');
+  if(alpha){
+    familyJumpSelect.style.display = 'none';
+    const sorted = flat.slice().sort((a,b)=> a.name.localeCompare(b.name));
+    html += `<div class="family-group">
+      <div class="family-title"><span>A–Z</span><span class="count">${sorted.length}</span></div>`;
+    sorted.forEach(r=> html += speciesRowHTML(r, true));
+    html += `</div>`;
+  } else {
+    familyJumpSelect.style.display = '';
+    const familyNames = Object.keys(byFamily);
+    const prevSelection = familyJumpSelect.value;
+    familyJumpSelect.innerHTML = '<option value="">Jump to family…</option>' +
+      familyNames.map(f => `<option value="${f.replace(/"/g,'&quot;')}">${f}</option>`).join('');
+    if(familyNames.includes(prevSelection)) familyJumpSelect.value = prevSelection;
+
+    familyNames.forEach(fam=>{
+      const rows = byFamily[fam];
+      const isCollapsed = collapsedFamilies.has(fam);
+      const anchorId = 'fam-' + fam.replace(/[^a-zA-Z0-9]/g,'');
+      html += `<div class="family-group ${isCollapsed ? 'collapsed' : ''}" id="${anchorId}">
+        <div class="family-title" data-family="${fam.replace(/"/g,'&quot;')}"><span>${isCollapsed ? '▸' : '▾'} ${fam}</span><span class="count">${rows.length}</span></div>`;
+      rows.forEach(r=> html += speciesRowHTML(r, false));
+      html += `</div>`;
+    });
+  }
+  listArea.innerHTML = html;
+  flashNorm = null;
+}
+
+function rarityRank(code){
+  if(!code) return 0;
+  if(code === 'Local') return 1;
+  if(code === 'RARE') return 2;
+  if(code === 'CASUAL') return 3;
+  if(code === 'ACCIDENTAL') return 4;
+  if(isExtinct(code) || isExtirpatedABA(code)) return 5;
+  return 6;
+}
+
+function buildNeedsListText(){
+  const byFamily = {};
+  let total = 0;
+  SPECIES_NORM.forEach(sp=>{
+    if(isProvisional(sp.code)) return; // not part of the official countable list
+    const have = speciesHas(sp);
+    if(have) return;
+    if(!toggleExtinct.checked && (isExtinct(sp.code) || isExtirpatedABA(sp.code))) return;
+    if(toggleHideCasual.checked && isCasual(sp.code)) return;
+    if(toggleHideAccidental.checked && isAccidental(sp.code)) return;
+    if(!byFamily[sp.family]) byFamily[sp.family] = [];
+    byFamily[sp.family].push(sp);
+    total++;
+  });
+
+  const lines = [];
+  Object.keys(byFamily).forEach(fam=>{
+    const group = byFamily[fam].slice().sort((a,b)=>{
+      const ra = rarityRank(a.code), rb = rarityRank(b.code);
+      if(ra !== rb) return ra - rb;
+      return a.name.localeCompare(b.name);
+    });
+    lines.push(fam.toUpperCase());
+    group.forEach(sp=>{
+      const label = statusLabel(sp.code);
+      lines.push(label ? `${sp.name} (${label})` : sp.name);
+    });
+    lines.push('');
+  });
+
+  const header = `ABA-Area birds I still need (${total}):`;
+  return header + '\n\n' + lines.join('\n').trim();
+}
+
+function buildFullListText(){
+  const byFamily = {};
+  let gotCount = 0, total = 0;
+  SPECIES_NORM.forEach(sp=>{
+    if(isProvisional(sp.code)) return; // not part of the official countable list
+    if(speciesHas(sp)) gotCount++;
+    total++;
+    if(!byFamily[sp.family]) byFamily[sp.family] = [];
+    byFamily[sp.family].push(sp);
+  });
+
+  const lines = [];
+  Object.keys(byFamily).forEach(fam=>{
+    const group = byFamily[fam].slice().sort((a,b)=>{
+      const ra = rarityRank(a.code), rb = rarityRank(b.code);
+      if(ra !== rb) return ra - rb;
+      return a.name.localeCompare(b.name);
+    });
+    lines.push(fam.toUpperCase());
+    group.forEach(sp=>{
+      const have = speciesHas(sp);
+      const label = statusLabel(sp.code);
+      const mark = have ? '[x]' : '[ ]';
+      const tag = label ? ` (${label})` : '';
+      lines.push(`${mark} ${sp.name}${tag}`);
+    });
+    lines.push('');
+  });
+
+  const header = `ABA-Area birds — full checklist (${gotCount} of ${total} recorded):`;
+  return header + '\n\n' + lines.join('\n').trim();
+}
+
+const shareBtn = document.getElementById('shareBtn');
+shareBtn.addEventListener('click', async ()=>{
+  if(!hasResults){ return; }
+  const text = buildNeedsListText();
+  if(navigator.share){
+    try{
+      await navigator.share({ title: 'ABA-Area birds I still need', text });
+      return;
+    }catch(e){ }
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    const original = shareBtn.textContent;
+    shareBtn.textContent = 'Copied to clipboard!';
+    setTimeout(()=>{ shareBtn.textContent = original; }, 2000);
+  }catch(e){
+    alert(text);
+  }
+});
+
+const shareFullBtn = document.getElementById('shareFullBtn');
+shareFullBtn.addEventListener('click', async ()=>{
+  if(!hasResults){ return; }
+  const text = buildFullListText();
+  if(navigator.share){
+    try{
+      await navigator.share({ title: 'ABA-Area birds — full checklist', text });
+      return;
+    }catch(e){ }
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    const original = shareFullBtn.textContent;
+    shareFullBtn.textContent = 'Copied to clipboard!';
+    setTimeout(()=>{ shareFullBtn.textContent = original; }, 2000);
+  }catch(e){
+    alert(text);
+  }
+});
+</script>
+</body>
+</html>
